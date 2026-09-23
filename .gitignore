@@ -1,0 +1,17 @@
+# uCore build outputs
+**/obj/
+**/bin/
+
+# QEMU/GDB temporary files
+**/.qemu.out
+**/.gdb.in
+
+# Packaged hand-in archives
+**/*-handin.tar.gz
+
+# Editor and operating-system metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
