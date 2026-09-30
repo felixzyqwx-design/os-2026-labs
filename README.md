@@ -9,6 +9,9 @@
 
 ## 目录
 
-- `lab1/`：最小可执行 RISC-V 内核与启动流程实验
+- `code/`：Lab 1 完整源代码
+- `report/report.md`：实验报告
+- `report/prompt.md`：关键提示词及设计说明
+- `report/images/`：构建、QEMU 和 GDB 测试截图
 
-实验报告与后续实验将在完成并复核后逐步加入。
+当前分支对应 Lab 1：最小可执行 RISC-V 内核与启动流程。
