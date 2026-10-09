@@ -1,7 +1,7 @@
 #include <mmu.h>
 #include <memlayout.h>
 
-    .section .text,"ax",%progbits
+    .section .text.kern_entry,"ax",%progbits
     .globl kern_entry
 kern_entry:
     la sp, bootstacktop
