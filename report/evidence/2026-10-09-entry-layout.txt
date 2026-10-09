@@ -1,0 +1,25 @@
+Controlled variable: order of init.o and entry.o in the link command.
+Compiler and other objects are identical in all cases.
+CASE: old-entry-first
+$ riscv64-unknown-elf-ld -m elf64lriscv -nostdlib --gc-sections -T /tmp/lab1-entry-review-y4c2pp_i/old.ld -o /tmp/lab1-entry-review-y4c2pp_i/old-entry-first.elf /tmp/lab1-entry-review-y4c2pp_i/old-entry.o obj/kern/init/init.o obj/kern/libs/stdio.o obj/kern/driver/console.o obj/libs/printfmt.o obj/libs/readline.o obj/libs/sbi.o obj/libs/string.o
+
+Entry point address:               0x80200000
+kern_entry = 0x80200000
+kern_init  = 0x8020000a
+Kernel printed: True
+CASE: old-init-first
+$ riscv64-unknown-elf-ld -m elf64lriscv -nostdlib --gc-sections -T /tmp/lab1-entry-review-y4c2pp_i/old.ld -o /tmp/lab1-entry-review-y4c2pp_i/old-init-first.elf obj/kern/init/init.o /tmp/lab1-entry-review-y4c2pp_i/old-entry.o obj/kern/libs/stdio.o obj/kern/driver/console.o obj/libs/printfmt.o obj/libs/readline.o obj/libs/sbi.o obj/libs/string.o
+
+Entry point address:               0x80200032
+kern_entry = 0x80200032
+kern_init  = 0x80200000
+Kernel printed: False
+CASE: fixed-init-first
+$ riscv64-unknown-elf-ld -m elf64lriscv -nostdlib --gc-sections -T '/mnt/d/Felix/Desktop/大学复习/大三上/专业课/操作系统/实验课/code/tools/kernel.ld' -o /tmp/lab1-entry-review-y4c2pp_i/fixed-init-first.elf obj/kern/init/init.o obj/kern/init/entry.o obj/kern/libs/stdio.o obj/kern/driver/console.o obj/libs/printfmt.o obj/libs/readline.o obj/libs/sbi.o obj/libs/string.o
+
+Entry point address:               0x80200000
+kern_entry = 0x80200000
+kern_init  = 0x8020000a
+Kernel printed: True
+PASS: fixed swapped-order image equals the normal image byte for byte.
+PASS: old layout depends on object order; dedicated entry section removes this dependence.

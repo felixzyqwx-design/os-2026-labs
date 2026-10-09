@@ -1,0 +1,2 @@
+# Command transcripts preserve the whitespace emitted by the tools.
+report/evidence/*.txt -whitespace
