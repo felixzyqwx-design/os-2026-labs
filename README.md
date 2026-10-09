@@ -14,7 +14,7 @@
 - `report/prompt.md`：关键提示词及设计说明
 - `report/images/`：构建、QEMU 和 GDB 测试截图
 - `report/evidence/`：2026 年 10 月 9 日复测的原始命令输出
-- `report/branch-review.md`：队友分支审查与链接顺序对照实验
+- `report/branch-review.md`：入口布局复核与链接顺序对照实验
 - `report/ai-process.md`：按阶段整理的 AI 协作记录
 - `report/defense.md`：展示流程、源码定位与答辩问答
 - `report/scripts/verify_lab1.py`：构建、链接顺序和 GDB 验证脚本

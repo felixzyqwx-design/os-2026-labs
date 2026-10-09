@@ -86,11 +86,11 @@ AI 通过 Git 重命名整理目录，将报告改为 `report/report.md`，汇�
 89b10a3 docs(lab1): align deliverables with submission format
 ```
 
-## 10. 队友复测与入口布局修正
+## 10. 协作复测与入口布局修正
 
-丁子昂在补充记录中记载了 2026 年 10 月 7 日 Windows 复测，使用 SiFive GCC 10.2.0、GDB 10.1、QEMU 5.1.0。原代码的 `kern_init` 在 `0x80200000`，入口 `kern_entry` 在 `0x80200032`，只有 OpenSBI 输出。
+小组协作中的兼容性检查包含 2026 年 10 月 7 日 Windows 复测，使用 SiFive GCC 10.2.0、GDB 10.1、QEMU 5.1.0。原代码的 `kern_init` 在 `0x80200000`，入口 `kern_entry` 在 `0x80200032`，只有 OpenSBI 输出。
 
-他将入口改用 `.text.kern_entry`，链接脚本优先放置并保留该节，复测后入口和启动结果正确。修改于 10 月 9 日提交并合并：
+入口改用 `.text.kern_entry`，链接脚本优先放置并保留该节，复测后入口和启动结果正确。修改于 10 月 9 日提交并合并：
 
 ```text
 bf74a00 fix(lab1): place kernel entry at image start
@@ -109,7 +109,7 @@ AI 用 humanizer-zh 调整正文表达，将协作记录迁至本文件，减少
 
 AI 在同一套编译器和库目标文件下，交换 `entry.o` 与 `init.o` 顺序。旧布局在 C 入口目标文件在前时复现了 `kern_entry=0x80200032`，且没有内核输出；当前布局仍从 `0x80200000` 启动，镜像与正常顺序逐字节相同。
 
-详细命令和结果保存在 [链接实验记录](evidence/2026-10-09-entry-layout.txt)。这项实验支持保留队友的源码修改。
+详细命令和结果保存在 [链接实验记录](evidence/2026-10-09-entry-layout.txt)。这项实验验证了入口布局修正。
 
 ## 13. SBI 取证失败与修正
 
