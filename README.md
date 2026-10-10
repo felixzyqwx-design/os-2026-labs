@@ -16,7 +16,6 @@
 - `report/evidence/`：2026 年 10 月 9 日复测的原始命令输出
 - `report/branch-review.md`：入口布局复核与链接顺序对照实验
 - `report/ai-process.md`：按阶段整理的 AI 协作记录
-- `report/defense.md`：展示流程、源码定位与答辩问答
 - `report/scripts/verify_lab1.py`：构建、链接顺序和 GDB 验证脚本
 
 当前分支对应 Lab 1：最小可执行 RISC-V 内核与启动流程。
