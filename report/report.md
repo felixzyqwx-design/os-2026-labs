@@ -2,6 +2,8 @@
 
 邹瑛琦（2412744）、丁子昂（2411130）
 
+版本：Lab 1 最终提交版（2026 年 10 月 12 日，`lab1` 分支）。
+
 仓库：[os-2026-labs，lab1 分支](https://github.com/felixzyqwx-design/os-2026-labs/tree/lab1)
 
 ## 1. 从源文件到内核第一条指令
@@ -150,7 +152,7 @@ Domain0 Next Mode    : S-mode
 
 最初使用指导书旧示例的 `-device loader,file=...,addr=0x80200000` 时，本机 OpenSBI 的下一跳地址为 0。改用 `-kernel` 后，QEMU 在预装镜像的同时向固件提供了下一阶段入口。该适配与上一节的入口布局修正共同保证了内核启动。
 
-测试脚本在看到输出后结束 QEMU。交互展示时，可按 `Ctrl+A`，松开后再按 `X` 退出。
+测试脚本在看到输出后结束 QEMU。本次在 Windows PowerShell 中交互复测时，按 `Ctrl+C` 可结束 QEMU 并返回命令提示符；此前写的 `Ctrl+A`、松开后按 `X` 在该终端中未生效。
 
 ## 4. 练习 1：内核入口的两条伪指令
 

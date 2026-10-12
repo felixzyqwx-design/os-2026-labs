@@ -18,7 +18,7 @@
 - `report/ai-process.md`：按阶段整理的 AI 协作记录
 - `report/scripts/verify_lab1.py`：构建、链接顺序和 GDB 验证脚本
 
-当前分支对应 Lab 1：最小可执行 RISC-V 内核与启动流程。
+当前 `lab1` 分支为 Lab 1 最终提交版（2026 年 10 月 12 日）：最小可执行 RISC-V 内核与启动流程。
 
 ## 运行
 
@@ -30,7 +30,7 @@ make
 make qemu
 ```
 
-QEMU 中按 `Ctrl+A`，松开后按 `X` 退出。调试时，终端 A 运行 `make debug`，终端 B 在同一目录运行 `make gdb`。
+本次在 Windows PowerShell 中实测，按 `Ctrl+C` 可结束 QEMU 并返回命令提示符。调试时，终端 A 运行 `make debug`，终端 B 在同一目录运行 `make gdb`。
 
 从仓库根目录执行完整复测：
 
