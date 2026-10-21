@@ -1,6 +1,6 @@
 # OS 2026 Labs
 
-操作系统课程实验仓库。每次实验独立存放，源码和报告不会混在一起。
+操作系统课程 Lab 2：物理内存管理。此 `lab2` 分支只保存本次实验；Lab 1 的最终版本在独立的 [`lab1` 分支](https://github.com/felixzyqwx-design/os-2026-labs/tree/lab1)。
 
 ## 小组成员
 
@@ -9,15 +9,22 @@
 
 ## 目录
 
-| 实验 | 源码 | 报告与说明 |
-| --- | --- | --- |
-| Lab 1：最小内核启动 | [`lab1/code/`](lab1/code/) | [`lab1/report/report.md`](lab1/report/report.md) |
-| Lab 2：物理内存管理 | [`lab2/code/`](lab2/code/) | [`lab2/README.md`](lab2/README.md)、[`lab2/report/report.md`](lab2/report/report.md) |
+| 目录 | 内容 |
+| --- | --- |
+| [`code/`](code/) | Lab 2 完整源码与构建脚本 |
+| [`report/`](report/) | [实验报告](report/report.md)、[关键提示词](report/prompt.md)、[AI 协作过程](report/ai-process.md)、[分配器复核](report/allocator-review.md)、[构建与运行核验](report/verification.md) |
 
-`lab1` 分支保留 Lab 1 的原始最终提交；`lab2` 分支在此基础上按上述目录整理，并加入 Lab 2。两个实验的构建产物 `bin/`、`obj/` 均不纳入版本管理。
+构建产物 `code/bin/`、`code/obj/` 不纳入版本管理。
 
 ## 构建与运行
 
-进入对应实验的 `code/` 目录后构建。Lab 1 的复测脚本在 [`lab1/report/scripts/verify_lab1.py`](lab1/report/scripts/verify_lab1.py)，Lab 2 的两种内存分配模式和核验步骤见 [`lab2/report/verification.md`](lab2/report/verification.md)。
+在已配置 RISC-V 工具链、QEMU、GNU Make 和 Git Unix 工具的 PowerShell 中进入 `code/` 后，默认构建 Best-Fit：
+
+```powershell
+mingw32-make -B
+qemu-system-riscv64 -machine virt -nographic -bios default -kernel .\bin\ucore.img
+```
+
+输出 `best_fit_pmm_manager` 和 `check_alloc_page() succeeded!` 表示默认自检通过。按 `Ctrl+C` 结束 QEMU。Buddy 模式使用 `mingw32-make -B DEFS=-DPMM_BUDDY` 重新构建；详细步骤见[核验记录](report/verification.md)。
 
 实验指导书：[课程网站](http://oslab.mobisys.top/lab2026/_book/)。

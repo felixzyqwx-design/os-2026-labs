@@ -11,14 +11,14 @@
 | GNU Make | 4.2.1（Windows 命令名 `mingw32-make`） |
 | 宿主环境 | Windows PowerShell；构建时还需 Git 提供的 Unix 工具 |
 
-版本由上述工具的 `--version` 输出核对。本次核验最初在独立工作目录 `D:\操作系统\lab2\lab2_new` 进行；仓库整理后的源码位于 `lab2/code/`。构建产物 `bin/kernel` 为带符号 ELF，`bin/ucore.img` 为启动用裸镜像；产物不等于源码提交。
+版本由上述工具的 `--version` 输出核对。本次核验最初在独立工作目录 `D:\操作系统\lab2\lab2_new` 进行；当前 `lab2` 分支的源码位于根目录 `code/`。构建产物 `bin/kernel` 为带符号 ELF，`bin/ucore.img` 为启动用裸镜像；产物不等于源码提交。
 
 ## 默认 Best-Fit
 
 在配置好工具链、QEMU、Make 和 Git Unix 工具的 PowerShell 中：
 
 ```powershell
-Set-Location 'D:\操作系统\os-2026-labs\lab2\code'
+Set-Location 'D:\操作系统\os-2026-labs\code'
 mingw32-make -B
 qemu-system-riscv64 -machine virt -nographic -bios default -kernel .\bin\ucore.img
 ```
@@ -57,7 +57,7 @@ Buddy 自检包括 1/3/5 页请求、向上取整、释放计数、无效请求�
 
 ## 入库后路径复测
 
-将两个实验分别整理到仓库的 `lab1/code/` 与 `lab2/code/` 后，在新路径重新执行了完整编译和 QEMU 启动。Lab 1 出现 `(THU.CST) os is loading ...`；Lab 2 默认模式出现 `memory management: best_fit_pmm_manager` 与 `check_alloc_page() succeeded!`；Buddy 模式出现 `memory management: buddy_pmm_manager`、`buddy checks: split, round-up, free and counts passed` 与 `check_alloc_page() succeeded!`。最后重新编译了默认模式。运行中的 QEMU 用 `Ctrl+C` 结束。
+在本分支的 `code/` 目录重新执行完整编译和 QEMU 启动。默认模式出现 `memory management: best_fit_pmm_manager` 与 `check_alloc_page() succeeded!`；Buddy 模式出现 `memory management: buddy_pmm_manager`、`buddy checks: split, round-up, free and counts passed` 与 `check_alloc_page() succeeded!`。最后重新编译默认模式。运行中的 QEMU 用 `Ctrl+C` 结束。
 
 ## 课程注入测试与未覆盖部分
 
