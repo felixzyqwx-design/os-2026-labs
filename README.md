@@ -1,6 +1,6 @@
 # OS 2026 Labs
 
-操作系统课程实验仓库。
+操作系统课程实验仓库。每次实验独立存放，源码和报告不会混在一起。
 
 ## 小组成员
 
@@ -9,33 +9,15 @@
 
 ## 目录
 
-- `code/`：Lab 1 完整源代码
-- `report/report.md`：实验报告
-- `report/prompt.md`：关键提示词及设计说明
-- `report/images/`：构建、QEMU 和 GDB 测试截图
-- `report/evidence/`：2026 年 10 月 9 日复测的原始命令输出
-- `report/branch-review.md`：入口布局复核与链接顺序对照实验
-- `report/ai-process.md`：按阶段整理的 AI 协作记录
-- `report/scripts/verify_lab1.py`：构建、链接顺序和 GDB 验证脚本
+| 实验 | 源码 | 报告与说明 |
+| --- | --- | --- |
+| Lab 1：最小内核启动 | [`lab1/code/`](lab1/code/) | [`lab1/report/report.md`](lab1/report/report.md) |
+| Lab 2：物理内存管理 | [`lab2/code/`](lab2/code/) | [`lab2/README.md`](lab2/README.md)、[`lab2/report/report.md`](lab2/report/report.md) |
 
-当前 `lab1` 分支为 Lab 1 最终提交版（2026 年 10 月 12 日）：最小可执行 RISC-V 内核与启动流程。
+`lab1` 分支保留 Lab 1 的原始最终提交；`lab2` 分支在此基础上按上述目录整理，并加入 Lab 2。两个实验的构建产物 `bin/`、`obj/` 均不纳入版本管理。
 
-## 运行
+## 构建与运行
 
-在已安装 RISC-V 工具链、QEMU 和 GDB 的 Ubuntu/WSL 终端中：
-
-```bash
-cd code
-make
-make qemu
-```
-
-本次在 Windows PowerShell 中实测，按 `Ctrl+C` 可结束 QEMU 并返回命令提示符。调试时，终端 A 运行 `make debug`，终端 B 在同一目录运行 `make gdb`。
-
-从仓库根目录执行完整复测：
-
-```bash
-python3 report/scripts/verify_lab1.py --tag retest
-```
+进入对应实验的 `code/` 目录后构建。Lab 1 的复测脚本在 [`lab1/report/scripts/verify_lab1.py`](lab1/report/scripts/verify_lab1.py)，Lab 2 的两种内存分配模式和核验步骤见 [`lab2/report/verification.md`](lab2/report/verification.md)。
 
 实验指导书：[课程网站](http://oslab.mobisys.top/lab2026/_book/)。

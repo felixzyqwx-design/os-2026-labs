@@ -318,7 +318,7 @@ MPP    = 1
 
 关键提示词保存在 [prompt.md](prompt.md)，按阶段记录的提问、回答、测试与修正见 [AI 协作过程](ai-process.md)。[入口布局复核记录](branch-review.md) 给出代码修正的技术分析和复测依据。
 
-在仓库根目录的 Ubuntu/WSL 终端执行以下命令，可以重新构建、运行链接顺序对照实验，并验证启动链、栈、尾调用和 SBI 陷入：
+在 `lab1/` 目录的 Ubuntu/WSL 终端执行以下命令，可以重新构建、运行链接顺序对照实验，并验证启动链、栈、尾调用和 SBI 陷入：
 
 ```bash
 python3 report/scripts/verify_lab1.py --tag retest

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run Lab 1 evidence collection in Ubuntu/WSL, using only the standard library.
 
-Usage (from the repository root):
+Usage (from the lab1 directory):
     python3 report/scripts/verify_lab1.py --tag 2026-10-09
 
 Each QEMU process is owned by this script and stopped in a finally block.
