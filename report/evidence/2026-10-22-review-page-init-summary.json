@@ -1,0 +1,51 @@
+[
+  {
+    "name": "zero-size",
+    "getter_base": "0x80000000",
+    "getter_size": "0x0",
+    "expected": "invalid physical memory reported by DTB",
+    "passed": true
+  },
+  {
+    "name": "wrong-base",
+    "getter_base": "0x80001000",
+    "getter_size": "0x8000000",
+    "expected": "invalid physical memory reported by DTB",
+    "passed": true
+  },
+  {
+    "name": "overflow",
+    "getter_base": "0x80000000",
+    "getter_size": "0xffffffffffffffff",
+    "expected": "invalid physical memory reported by DTB",
+    "passed": true
+  },
+  {
+    "name": "below-kernel",
+    "getter_base": "0x80000000",
+    "getter_size": "0x100000",
+    "expected": "no usable kernel memory",
+    "passed": true
+  },
+  {
+    "name": "no-descriptor-room",
+    "getter_base": "0x80000000",
+    "getter_size": "0x201000",
+    "expected": "kernel and Page descriptors exceed physical memory",
+    "passed": true
+  },
+  {
+    "name": "partial-tail",
+    "getter_base": "0x80000000",
+    "getter_size": "0x4000123",
+    "expected": "check_alloc_page() succeeded!",
+    "passed": true
+  },
+  {
+    "name": "no-full-free-page",
+    "getter_base": "0x80000000",
+    "getter_size": "0x20d000",
+    "expected": "satp physical address:",
+    "passed": true
+  }
+]

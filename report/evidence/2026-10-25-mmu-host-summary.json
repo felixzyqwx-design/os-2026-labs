@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "lookup",
+    "mode": "Bare",
+    "ordinal": 1,
+    "addr": "0x81004000",
+    "tag": "0xffffffffffffffff",
+    "hit": false,
+    "next_line": 1711,
+    "next_source": "if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,"
+  },
+  {
+    "kind": "translation",
+    "mode": "Bare",
+    "satp": "0x0",
+    "va": "0x81004000",
+    "pa": "0x81004000",
+    "page_walk": false
+  },
+  {
+    "kind": "fill",
+    "mode": "Bare",
+    "va": "0x81004000",
+    "pa": "0x81004000",
+    "protection": 7,
+    "mmu_index": 1,
+    "size": 4096
+  },
+  {
+    "kind": "lookup",
+    "mode": "Bare",
+    "ordinal": 2,
+    "addr": "0x81004000",
+    "tag": "0x81004000",
+    "hit": true,
+    "next_line": 1721,
+    "next_source": "full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];"
+  },
+  {
+    "kind": "lookup",
+    "mode": "Sv39",
+    "ordinal": 1,
+    "addr": "0xffffffffc1004000",
+    "tag": "0xffffffffffffffff",
+    "hit": false,
+    "next_line": 1711,
+    "next_source": "if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,"
+  },
+  {
+    "kind": "translation",
+    "mode": "Sv39",
+    "satp": "0x8000000000080205",
+    "va": "0xffffffffc1004000",
+    "root_pa": "0x80205000",
+    "vpn2": 511,
+    "levels": 3,
+    "pte_pa": "0x80205ff8",
+    "pte": "0x200000cf",
+    "pa": "0x81004000",
+    "leaf_size": 1073741824,
+    "walked_entries": 1,
+    "page_walk": true
+  },
+  {
+    "kind": "fill",
+    "mode": "Sv39",
+    "va": "0xffffffffc1004000",
+    "pa": "0x81004000",
+    "protection": 7,
+    "mmu_index": 1,
+    "size": 4096
+  },
+  {
+    "kind": "lookup",
+    "mode": "Sv39",
+    "ordinal": 2,
+    "addr": "0xffffffffc1004000",
+    "tag": "0xffffffffc1004000",
+    "hit": true,
+    "next_line": 1721,
+    "next_source": "full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];"
+  }
+]

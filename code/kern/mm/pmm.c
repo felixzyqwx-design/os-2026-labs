@@ -37,6 +37,8 @@ static void check_alloc_page(void);
 static void init_pmm_manager(void) {
 #ifdef PMM_BUDDY
     pmm_manager = &buddy_pmm_manager;
+#elif defined(PMM_FIRST_FIT)
+    pmm_manager = &default_pmm_manager;
 #else
     pmm_manager = &best_fit_pmm_manager;
 #endif
@@ -102,7 +104,7 @@ static void page_init(void) {
 
     uintptr_t free_begin = ROUNDUP(descriptor_end, PGSIZE);
     uintptr_t free_end = ROUNDDOWN(mem_end, PGSIZE);
-    cprintf("physical memory map: [0x%016lx, 0x%016lx], free: [0x%016lx, 0x%016lx]\n",
+    cprintf("physical memory map: [0x%016lx, 0x%016lx), free: [0x%016lx, 0x%016lx)\n",
             mem_base, mem_end, free_begin, free_end);
     if (free_begin < free_end) {
         init_memmap(pa2page(free_begin), (free_end - free_begin) / PGSIZE);

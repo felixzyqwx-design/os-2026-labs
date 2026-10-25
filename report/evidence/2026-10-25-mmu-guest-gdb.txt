@@ -1,0 +1,27 @@
+The target architecture is set to "riscv:rv64".
+0x0000000000001000 in ?? ()
+
+Breakpoint -1, 0x0000000080200000 in ?? ()
+Bare FIXTURE: two guest ld instructions; data=0x81004000
+=> 0x81000000:	sfence.vma
+   0x81000004:	ld	t0,0(t1)
+   0x81000008:	ld	t2,0(t1)
+   0x8100000c:	ebreak
+
+
+Breakpoint -2, 0x000000008100000c in ?? ()
+Bare LOADS VERIFIED: t0=t2=0x1122334455667788
+
+Breakpoint -3, kern_init () at kern/init/init.c:30
+30	    memset(edata, 0, end - edata);
+Sv39 FIXTURE: two guest ld instructions; data=0xffffffffc1004000
+=> 0xffffffffc1000000:	sfence.vma
+   0xffffffffc1000004:	ld	t0,0(t1)
+   0xffffffffc1000008:	ld	t2,0(t1)
+   0xffffffffc100000c:	ebreak
+
+
+Breakpoint -4, 0xffffffffc100000c in ?? ()
+Sv39 LOADS VERIFIED: t0=t2=0x1122334455667788
+MMU GUEST CHECK COMPLETE
+[Inferior 1 (process 1) detached]

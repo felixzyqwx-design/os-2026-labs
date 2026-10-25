@@ -23,7 +23,19 @@ make_print() {
     echo `$make $makeopts print-$1`
 }
 
-echo `$make`
+# Stop on a failed build instead of letting echo hide its exit status.
+$make $makeopts || exit 1
+
+pid=
+cleanup_qemu() {
+    if [ -n "$pid" ]; then
+        kill "$pid" > /dev/null 2>&1 || :
+        wait "$pid" > /dev/null 2>&1 || :
+    fi
+}
+trap cleanup_qemu EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 ## command tools
 awk='awk'
@@ -229,6 +241,21 @@ qemuopts="-machine virt -nographic -bios default -kernel bin/ucore.img"
 brkfun=
 
 run_qemu
+
+# Firmware output alone can arrive before the tests. Wait for both completion
+# markers or an actual failure; always bound the wait and clean up our child.
+deadline=$(( $(date +%s) + default_timeout ))
+while kill -0 "$pid" > /dev/null 2>&1; do
+    if { grep -Fq '[Test 1] Page Init: PASS' "$qemu_out" &&
+         grep -Fq '[Test 2] Best-Fit: PASS' "$qemu_out"; } ||
+       grep -Eq 'kernel panic|FAIL|assertion failed' "$qemu_out"; then
+        break
+    fi
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+        break
+    fi
+    sleep 0.1
+done
 
 ## check now!!
 

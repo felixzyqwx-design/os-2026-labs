@@ -1,0 +1,27 @@
+{
+  "source": "/home/felix/oslab-tools/qemu-8.2.2",
+  "binary": "/home/felix/oslab-tools/qemu-8.2.2/build/qemu-system-riscv64",
+  "source_url": "https://download.qemu.org/qemu-8.2.2.tar.xz",
+  "source_sha256": "847346c1b82c1a54b2c38f6edbd85549edeb17430b7d4d3da12620e2962bc4f3",
+  "configure": [
+    "/home/felix/oslab-tools/qemu-8.2.2/configure",
+    "--target-list=riscv64-softmmu",
+    "--without-default-features",
+    "--enable-tcg",
+    "--enable-tcg-interpreter",
+    "--enable-fdt",
+    "--enable-debug",
+    "--disable-werror",
+    "--disable-docs",
+    "--disable-tools",
+    "--disable-guest-agent",
+    "--disable-gio",
+    "--disable-plugins",
+    "--disable-pie",
+    "--extra-cflags=-O0 -g3",
+    "--extra-ldflags=-no-pie -Wl,-rpath,/home/felix/oslab-tools/qemu-8.2.2-sdk/usr/lib/x86_64-linux-gnu"
+  ],
+  "local_multiarch_include": "/home/felix/oslab-tools/qemu-8.2.2-sdk/usr/include/x86_64-linux-gnu",
+  "local_library_search": "/home/felix/oslab-tools/qemu-8.2.2-sdk/usr/lib/x86_64-linux-gnu",
+  "binary_sha256": "ce19dc8029fd4f08f04bfbe5fb315192942d59ad01b39ec73ce2754b0c456e35"
+}

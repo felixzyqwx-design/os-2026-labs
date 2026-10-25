@@ -1,0 +1,28 @@
+lab2 injection complete
+gmake[1]: *** Deleting file 'obj/kern/test/test_lab2.d'
+gmake[1]: *** Deleting file 'obj/kern/mm/pmm.d'
+gmake[1]: *** Deleting file 'obj/kern/mm/default_pmm.d'
+gmake[1]: *** Deleting file 'obj/kern/mm/buddy_pmm.d'
+gmake[1]: *** Deleting file 'obj/kern/mm/best_fit_pmm.d'
+gmake[1]: *** Deleting file 'obj/kern/driver/dtb.d'
+gmake[1]: *** Deleting file 'obj/kern/driver/console.d'
+gmake[1]: *** Deleting file 'obj/kern/debug/panic.d'
+gmake[1]: *** Deleting file 'obj/kern/libs/stdio.d'
+gmake[1]: *** Deleting file 'obj/kern/init/init.d'
+gmake[1]: *** Deleting file 'obj/kern/init/entry.d'
+gmake[1]: *** Deleting file 'obj/libs/string.d'
+gmake[1]: *** Deleting file 'obj/libs/sbi.d'
+gmake[1]: *** Deleting file 'obj/libs/readline.d'
+gmake[1]: *** Deleting file 'obj/libs/printfmt.d'
++ cc kern/libs/stdio.c
++ cc kern/init/init.c
++ cc kern/init/entry.S
++ cc kern/debug/panic.c
++ cc kern/driver/console.c
+gmake[1]: *** [Makefile:126: obj/kern/init/init.o] Error 1
+gmake[1]: *** Waiting for unfinished jobs....
+gmake[1]: *** [Makefile:126: obj/kern/init/entry.o] Error 1
+gmake[1]: *** [Makefile:126: obj/kern/libs/stdio.o] Error 1
+gmake[1]: *** [Makefile:126: obj/kern/debug/panic.o] Error 1
+gmake[1]: *** [Makefile:126: obj/kern/driver/console.o] Error 1
+make: *** [Makefile:223: grade] Error 1

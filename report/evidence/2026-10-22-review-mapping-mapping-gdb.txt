@@ -1,0 +1,20 @@
+The target architecture is set to "riscv:rv64".
+0x0000000000001000 in ?? ()
+Hardware assisted breakpoint 1 at 0xffffffffc02000d6: file kern/init/init.c, line 30.
+
+Breakpoint 1, kern_init () at kern/init/init.c:30
+30	    memset(edata, 0, end - edata);
+satp=0x8000000000080205 root_pa=0x0000000080205000 root_va=0xffffffffc0205000
+VA=0xffffffffc02000d6 VPN2=511 PTE=0x00000000200000cf PA=0x00000000802000d6
+bytes at high VA: 17650000130525f4
+00000000802000d6: 0x17 0x65 0x00 0x00 0x13 0x05 0x25 0xf4
+
+pc             0xffffffffc02000d6	0xffffffffc02000d6 <kern_init>
+sp             0xffffffffc0205000	0xffffffffc0205000
+satp           0x8000000000080205	-9223372036854251003
+scause         0x0	0
+sepc           0x0	0
+stval          0x0	0
+
+MAPPING CHECK COMPLETE
+[Inferior 1 (process 1) detached]

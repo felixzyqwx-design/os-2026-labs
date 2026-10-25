@@ -1,0 +1,4 @@
+lab2 injection complete
+tools/grade.sh: 2: : not found
+tools/grade.sh: 146: Syntax error: ")" unexpected (expecting "then")
+make: *** [Makefile:211: grade] Error 2

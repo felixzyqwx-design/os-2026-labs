@@ -34,6 +34,14 @@ CFLAGS  := -mcmodel=medany -std=gnu99 -Wno-unused -Werror
 CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CFLAGS	+= -g
+PMM ?= best_fit
+ifeq ($(PMM),buddy)
+CFLAGS += -DPMM_BUDDY
+else ifeq ($(PMM),first_fit)
+CFLAGS += -DPMM_FIRST_FIT
+else ifneq ($(PMM),best_fit)
+$(error Unsupported PMM '$(PMM)'; use best_fit, buddy or first_fit)
+endif
 CFLAGS2 = $(CFLAGS) -D ucore_test
 CTYPE	:= c S
 LD      := $(GCCPREFIX)ld
@@ -109,7 +117,7 @@ KSRCDIR		+= kern/init \
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
-ifeq ($(MAKECMDGOALS),test)
+ifneq ($(filter test,$(MAKECMDGOALS)),)
 $(call add_files_cc2,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
 else
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
@@ -142,6 +150,17 @@ $(call create_target,ucore.img)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 $(call finish_all)
+
+# Make normally ignores compiler option changes. Only update this stamp when
+# the effective compiler/flags change, so switching PMM rebuilds stale objects.
+.PHONY: FORCE
+FORCE:
+BUILD_CONFIG := $(OBJDIR)/.build-config
+$(BUILD_CONFIG): FORCE | $(OBJDIR)/
+	@printf '%s\n' '$(CC)' '$(CFLAGS)' '$(if $(filter test,$(MAKECMDGOALS)),$(CFLAGS2),$(CFLAGS))' > $@.tmp
+	@cmp -s $@.tmp $@ || mv $@.tmp $@
+	@rm -f $@.tmp
+$(ALLOBJS): $(BUILD_CONFIG)
 
 IGNORE_ALLDEPS	= clean \
 				  dist-clean \
@@ -200,16 +219,19 @@ TOUCH_FILES		:=
 
 MAKEOPTS		:= --quiet --no-print-directory
 
-GRADE_TMP	:= /tmp/lab2_grade
-
 grade:
-	$(V)$(MAKE) $(MAKEOPTS) clean
-	$(V)$(RM) -rf $(GRADE_TMP)
-	$(V)$(MKDIR) $(GRADE_TMP)
-	$(V)tar -C . --exclude=.git --exclude=.vscode --exclude=vcs -cf - . | tar -C $(GRADE_TMP) -xf -
-	$(V)python3 tools/inject.py $(GRADE_TMP)
-	$(V)cd $(GRADE_TMP) && $(SH) tools/grade.sh
-	$(V)$(RM) -rf $(GRADE_TMP)
+	$(V)set -eu; \
+	rm -f '$(GRADE_QEMU_OUT)'; \
+	grade_tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/ucore-lab2-grade.XXXXXX"); \
+	trap 'rm -rf "$$grade_tmp"' EXIT; \
+	tar --exclude=.git --exclude=.vscode --exclude=vcs --exclude=obj --exclude=bin --exclude=.qemu.out --exclude=.gdb.in -cf "$$grade_tmp/source.tar" .; \
+	tar -C "$$grade_tmp" -xf "$$grade_tmp/source.tar"; \
+	rm "$$grade_tmp/source.tar"; \
+	python3 tools/inject.py "$$grade_tmp"; \
+	cd "$$grade_tmp"; \
+	grade_status=0; $(SH) tools/grade.sh || grade_status=$$?; \
+	if [ -f .qemu.out ]; then cp .qemu.out '$(CURDIR)/$(GRADE_QEMU_OUT)'; fi; \
+	exit $$grade_status
 
 touch:
 	$(V)$(foreach f,$(TOUCH_FILES),$(TOUCH) $(f))

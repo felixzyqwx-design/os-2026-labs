@@ -1,0 +1,227 @@
+[
+  {
+    "name": "build-default",
+    "command": [
+      "make",
+      "-B",
+      "-j2"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": []
+  },
+  {
+    "name": "boot-default",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "128",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: best_fit_pmm_manager",
+      "check_alloc_page() succeeded!"
+    ]
+  },
+  {
+    "name": "boot-default-64",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "64",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: best_fit_pmm_manager",
+      "check_alloc_page() succeeded!"
+    ]
+  },
+  {
+    "name": "boot-default-256",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "256",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: best_fit_pmm_manager",
+      "check_alloc_page() succeeded!"
+    ]
+  },
+  {
+    "name": "build-buddy",
+    "command": [
+      "make",
+      "-j2",
+      "DEFS=-DPMM_BUDDY"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": []
+  },
+  {
+    "name": "symbols-buddy",
+    "command": [
+      "riscv64-unknown-elf-nm",
+      "bin/kernel"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": [
+      "buddy_pmm_manager"
+    ]
+  },
+  {
+    "name": "boot-buddy",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "128",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: buddy_pmm_manager",
+      "check_alloc_page() succeeded!",
+      "buddy checks:"
+    ]
+  },
+  {
+    "name": "build-first-fit",
+    "command": [
+      "make",
+      "-j2",
+      "PMM=first_fit"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": []
+  },
+  {
+    "name": "boot-first-fit",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "128",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: default_pmm_manager",
+      "check_alloc_page() succeeded!"
+    ]
+  },
+  {
+    "name": "build-default-again",
+    "command": [
+      "make",
+      "-j2"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": []
+  },
+  {
+    "name": "symbols-default-again",
+    "command": [
+      "riscv64-unknown-elf-nm",
+      "bin/kernel"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": [
+      "best_fit_pmm_manager"
+    ]
+  },
+  {
+    "name": "boot-default-again",
+    "command": [
+      "qemu-system-riscv64",
+      "-machine",
+      "virt",
+      "-m",
+      "128",
+      "-nographic",
+      "-bios",
+      "default",
+      "-kernel",
+      "bin/ucore.img"
+    ],
+    "exit": 0,
+    "timed_out": true,
+    "passed": true,
+    "expected": [
+      "memory management: best_fit_pmm_manager",
+      "check_alloc_page() succeeded!"
+    ]
+  },
+  {
+    "name": "grade",
+    "command": [
+      "make",
+      "grade"
+    ],
+    "exit": 0,
+    "timed_out": false,
+    "passed": true,
+    "expected": [
+      "-check page init:",
+      "-check best fit:",
+      "Total Score: 20/20"
+    ]
+  },
+  {
+    "name": "grade-kernel-markers",
+    "passed": true
+  }
+]

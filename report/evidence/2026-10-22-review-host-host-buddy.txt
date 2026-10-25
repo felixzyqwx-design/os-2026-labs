@@ -1,0 +1,4 @@
+buddy checks: split, round-up, free and counts passed
+buddy checks: split, round-up, free and counts passed
+buddy checks: split, round-up, free and counts passed
+HOST PASS buddy_pmm_manager: 20000 operations, exhaustion, alignment, ownership and counts

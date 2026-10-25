@@ -1,2 +1,6 @@
 # Command transcripts preserve the whitespace emitted by the tools.
 report/evidence/*.txt -whitespace
+*.sh text eol=lf
+*.py text eol=lf
+Makefile text eol=lf
+*.mk text eol=lf

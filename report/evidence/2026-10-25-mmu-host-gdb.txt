@@ -1,0 +1,223 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+OpenSBI v1.3.1
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|___\x00/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 10000000Hz
+Platform Console Device   : uart8250
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : sifive_test
+Platform Shutdown Device  : sifive_test
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 194 KB
+Firmware RW Offset        : 0x20000
+Firmware RW Size          : 66 KB
+Firmware Heap Offset      : 0x28000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
+Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
+Runtime SBI Version       : 1.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080000000-0x000000008001ffff M: (R,X) S/U: ()
+Domain0 Region02          : 0x0000000080020000-0x000000008003ffff M: (R,W) S/U: ()
+Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000087e00000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : v1.12
+Boot HART Base ISA        : rv64imafdch
+Boot HART ISA Extensions  : time,sstc
+Boot HART PMP Count       : 16
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 16
+Boot HART MIDELEG         : 0x0000000000001666
+Boot HART MEDELEG         : 0x0000000000f0b509
+[Switching to Thread 0x7ffff703a6c0 (LWP 408)]
+
+Thread 3 "qemu-system-ris" hit Breakpoint -4, riscv_cpu_tlb_fill (cs=0x1318e20, address=2164260864, size=1, access_type=MMU_INST_FETCH, mmu_idx=1, probe=false, retaddr=0) at ../target/riscv/cpu_helper.c:1293
+1293	{
+BARE PROBE FETCH REACHED: arming controlled-load breakpoints
+
+Thread 3 "qemu-system-ris" hit Breakpoint -1, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1701
+1701	    vaddr addr = data->addr;
+LOOKUP ENTRY data->addr=0x81004000 expected=0x81004000
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -14, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1710
+1710	    if (!tlb_hit(tlb_addr, addr)) {
+#0  mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1710
+#1  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178592, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#2  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178592, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#3  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=2164277248, oi=20529, retaddr=140736146178592) at ../accel/tcg/ldst_common.c.inc:40
+#4  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=2164277248, oi=20529, tb_ptr=0x7fffb0000220) at ../tcg/tci.c:299
+#5  0x0000000000a9aa7f in tcg_qemu_tb_exec (env=0x131b5e0, v_tb_ptr=0x7fffb0000200) at ../tcg/tci.c:949
+#6  0x000000000084968f in cpu_tb_exec (cpu=0x1318e20, itb=0x7fffb0000140, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:458
+#7  0x000000000084a33e in cpu_loop_exec_tb (cpu=0x1318e20, tb=0x7fffb0000140, pc=2164260868, last_tb=0x7ffff7039a30, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:920
+
+1711	        if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,
+MMU_RECORD {"kind": "lookup", "mode": "Bare", "ordinal": 1, "addr": "0x81004000", "tag": "0xffffffffffffffff", "hit": false, "next_line": 1711, "next_source": "if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,"}
+
+Thread 3 "qemu-system-ris" hit Breakpoint -2, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=2164277248, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:801
+801	{
+#0  get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=2164277248, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:801
+#1  0x00000000006ced6b in riscv_cpu_tlb_fill (cs=0x1318e20, address=2164277248, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1377
+#2  0x000000000085a740 in tlb_fill (cpu=0x1318e20, addr=2164277248, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, retaddr=140736146178592) at ../accel/tcg/cputlb.c:1315
+#3  0x000000000085cf78 in mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1713
+#4  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178592, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#5  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178592, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#6  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=2164277248, oi=20529, retaddr=140736146178592) at ../accel/tcg/ldst_common.c.inc:40
+#7  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=2164277248, oi=20529, tb_ptr=0x7fffb0000220) at ../tcg/tci.c:299
+
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -15, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=2164277248, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:877
+877	        *physical = addr;
+878	        *ret_prot = PAGE_READ | PAGE_WRITE | PAGE_EXEC;
+MMU_RECORD {"kind": "translation", "mode": "Bare", "satp": "0x0", "va": "0x81004000", "pa": "0x81004000", "page_walk": false}
+0x00000000006ced6b in riscv_cpu_tlb_fill (cs=0x1318e20, address=2164277248, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1377
+1377	        ret = get_physical_address(env, &pa, &prot, address, NULL,
+Value returned is $1 = 0
+
+Thread 3 "qemu-system-ris" hit Breakpoint -3, tlb_set_page (cpu=0x1318e20, addr=2164277248, paddr=2164277248, prot=7, mmu_idx=1, size=4096) at ../accel/tcg/cputlb.c:1297
+1297	    tlb_set_page_with_attrs(cpu, addr, paddr, MEMTXATTRS_UNSPECIFIED,
+MMU_RECORD {"kind": "fill", "mode": "Bare", "va": "0x81004000", "pa": "0x81004000", "protection": 7, "mmu_index": 1, "size": 4096}
+riscv_cpu_tlb_fill (cs=0x1318e20, address=2164277248, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1406
+1406	        return true;
+
+Thread 3 "qemu-system-ris" hit Breakpoint -1, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1701
+1701	    vaddr addr = data->addr;
+LOOKUP ENTRY data->addr=0x81004000 expected=0x81004000
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -16, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1710
+1710	    if (!tlb_hit(tlb_addr, addr)) {
+#0  mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1710
+#1  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178912, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#2  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178912, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#3  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=2164277248, oi=20529, retaddr=140736146178912) at ../accel/tcg/ldst_common.c.inc:40
+#4  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=2164277248, oi=20529, tb_ptr=0x7fffb0000360) at ../tcg/tci.c:299
+#5  0x0000000000a9aa7f in tcg_qemu_tb_exec (env=0x131b5e0, v_tb_ptr=0x7fffb0000340) at ../tcg/tci.c:949
+#6  0x000000000084968f in cpu_tb_exec (cpu=0x1318e20, itb=0x7fffb0000280, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:458
+#7  0x000000000084a33e in cpu_loop_exec_tb (cpu=0x1318e20, tb=0x7fffb0000280, pc=2164260872, last_tb=0x7ffff7039a30, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:920
+
+1721	    full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];
+MMU_RECORD {"kind": "lookup", "mode": "Bare", "ordinal": 2, "addr": "0x81004000", "tag": "0x81004000", "hit": true, "next_line": 1721, "next_source": "full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];"}
+mmu_lookup (cpu=0x1318e20, addr=2164277248, oi=20529, ra=140736146178912, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1805
+1805	        flags = l->page[0].flags;
+Value returned is $2 = false
+
+Thread 3 "qemu-system-ris" hit Breakpoint -1, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1701
+1701	    vaddr addr = data->addr;
+LOOKUP ENTRY data->addr=0xffffffffc1004000 expected=0xffffffffc1004000
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -17, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1710
+1710	    if (!tlb_hit(tlb_addr, addr)) {
+#0  mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1710
+#1  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178592, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#2  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178592, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#3  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=18446744072652603392, oi=20529, retaddr=140736146178592) at ../accel/tcg/ldst_common.c.inc:40
+#4  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=18446744072652603392, oi=20529, tb_ptr=0x7fffb0000220) at ../tcg/tci.c:299
+#5  0x0000000000a9aa7f in tcg_qemu_tb_exec (env=0x131b5e0, v_tb_ptr=0x7fffb0000200) at ../tcg/tci.c:949
+#6  0x000000000084968f in cpu_tb_exec (cpu=0x1318e20, itb=0x7fffb0000140, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:458
+#7  0x000000000084a33e in cpu_loop_exec_tb (cpu=0x1318e20, tb=0x7fffb0000140, pc=18446744072652587012, last_tb=0x7ffff7039a30, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:920
+
+1711	        if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,
+MMU_RECORD {"kind": "lookup", "mode": "Sv39", "ordinal": 1, "addr": "0xffffffffc1004000", "tag": "0xffffffffffffffff", "hit": false, "next_line": 1711, "next_source": "if (!victim_tlb_hit(cpu, mmu_idx, index, access_type,"}
+
+Thread 3 "qemu-system-ris" hit Breakpoint -2, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:801
+801	{
+#0  get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:801
+#1  0x00000000006ced6b in riscv_cpu_tlb_fill (cs=0x1318e20, address=18446744072652603392, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1377
+#2  0x000000000085a740 in tlb_fill (cpu=0x1318e20, addr=18446744072652603392, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, retaddr=140736146178592) at ../accel/tcg/cputlb.c:1315
+#3  0x000000000085cf78 in mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178592) at ../accel/tcg/cputlb.c:1713
+#4  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178592, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#5  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178592, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#6  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=18446744072652603392, oi=20529, retaddr=140736146178592) at ../accel/tcg/ldst_common.c.inc:40
+#7  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=18446744072652603392, oi=20529, tb_ptr=0x7fffb0000220) at ../tcg/tci.c:299
+
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -18, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:953
+953	            pte_addr = base + idx * ptesize;
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -19, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:992
+992	        if (!(pte & PTE_V)) {
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -20, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:1011
+1011	    if (ppn & ((1ULL << ptshift) - 1)) {
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -21, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:1139
+1139	    *physical = (((ppn & ~napot_mask) | (vpn & napot_mask) |
+1140	                  (vpn & (((target_ulong)1 << ptshift) - 1))
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -22, get_physical_address (env=0x131b5e0, physical=0x7ffff70390e0, ret_prot=0x7ffff70390cc, addr=18446744072652603392, fault_pte_addr=0x0, access_type=0, mmu_idx=1, first_stage=true, two_stage=false, is_debug=false) at ../target/riscv/cpu_helper.c:1148
+1148	    if (access_type != MMU_DATA_STORE && !(pte & PTE_D)) {
+MMU_RECORD {"kind": "translation", "mode": "Sv39", "satp": "0x8000000000080205", "va": "0xffffffffc1004000", "root_pa": "0x80205000", "vpn2": 511, "levels": 3, "pte_pa": "0x80205ff8", "pte": "0x200000cf", "pa": "0x81004000", "leaf_size": 1073741824, "walked_entries": 1, "page_walk": true}
+0x00000000006ced6b in riscv_cpu_tlb_fill (cs=0x1318e20, address=18446744072652603392, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1377
+1377	        ret = get_physical_address(env, &pa, &prot, address, NULL,
+Value returned is $3 = 0
+
+Thread 3 "qemu-system-ris" hit Breakpoint -3, tlb_set_page (cpu=0x1318e20, addr=18446744072652603392, paddr=2164277248, prot=7, mmu_idx=1, size=4096) at ../accel/tcg/cputlb.c:1297
+1297	    tlb_set_page_with_attrs(cpu, addr, paddr, MEMTXATTRS_UNSPECIFIED,
+MMU_RECORD {"kind": "fill", "mode": "Sv39", "va": "0xffffffffc1004000", "pa": "0x81004000", "protection": 7, "mmu_index": 1, "size": 4096}
+riscv_cpu_tlb_fill (cs=0x1318e20, address=18446744072652603392, size=8, access_type=MMU_DATA_LOAD, mmu_idx=1, probe=false, retaddr=140736146178592) at ../target/riscv/cpu_helper.c:1406
+1406	        return true;
+
+Thread 3 "qemu-system-ris" hit Breakpoint -1, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1701
+1701	    vaddr addr = data->addr;
+LOOKUP ENTRY data->addr=0xffffffffc1004000 expected=0xffffffffc1004000
+
+Thread 3 "qemu-system-ris" hit Temporary breakpoint -23, mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1710
+1710	    if (!tlb_hit(tlb_addr, addr)) {
+#0  mmu_lookup1 (cpu=0x1318e20, data=0x7ffff7039270, mmu_idx=1, access_type=MMU_DATA_LOAD, ra=140736146178912) at ../accel/tcg/cputlb.c:1710
+#1  0x000000000085d27a in mmu_lookup (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178912, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1803
+#2  0x000000000085e8d2 in do_ld8_mmu (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178912, access_type=MMU_DATA_LOAD) at ../accel/tcg/cputlb.c:2437
+#3  0x0000000000860203 in helper_ldq_mmu (env=0x131b5e0, addr=18446744072652603392, oi=20529, retaddr=140736146178912) at ../accel/tcg/ldst_common.c.inc:40
+#4  0x0000000000a983a8 in tci_qemu_ld (env=0x131b5e0, taddr=18446744072652603392, oi=20529, tb_ptr=0x7fffb0000360) at ../tcg/tci.c:299
+#5  0x0000000000a9aa7f in tcg_qemu_tb_exec (env=0x131b5e0, v_tb_ptr=0x7fffb0000340) at ../tcg/tci.c:949
+#6  0x000000000084968f in cpu_tb_exec (cpu=0x1318e20, itb=0x7fffb0000280, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:458
+#7  0x000000000084a33e in cpu_loop_exec_tb (cpu=0x1318e20, tb=0x7fffb0000280, pc=18446744072652587016, last_tb=0x7ffff7039a30, tb_exit=0x7ffff7039a20) at ../accel/tcg/cpu-exec.c:920
+
+1721	    full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];
+MMU_RECORD {"kind": "lookup", "mode": "Sv39", "ordinal": 2, "addr": "0xffffffffc1004000", "tag": "0xffffffffc1004000", "hit": true, "next_line": 1721, "next_source": "full = &cpu->neg.tlb.d[mmu_idx].fulltlb[index];"}
+mmu_lookup (cpu=0x1318e20, addr=18446744072652603392, oi=20529, ra=140736146178912, type=MMU_DATA_LOAD, l=0x7ffff7039270) at ../accel/tcg/cputlb.c:1805
+1805	        flags = l->page[0].flags;
+Value returned is $4 = false
+MMU HOST CHECK COMPLETE
+[Inferior 1 (process 404) detached]
+DTB Init
+HartID: 0
+DTB Address: 0x87e00000
+Physical Memory from DTB:
+  Base: 0x0000000080000000
+  Size: 0x0000000008000000 (128 MB)
+  End:  0x0000000087ffffff
+DTB init completed
+(THU.CST) os is loading ...
+Special kernel symbols:
+  entry  0xffffffffc02000d6 (virtual)
+  etext  0xffffffffc0201680 (virtual)
+  edata  0xffffffffc0206018 (virtual)
+  end    0xffffffffc0206078 (virtual)
+Kernel executable memory footprint: 24KB
+memory management: best_fit_qemu-system-riscv64: terminating on signal 15 from pid 327 (/usr/bin/python3)
