@@ -1,0 +1,54 @@
+[
+  {
+    "case": 0,
+    "cause": "0x3",
+    "epc_before": "0xffffffffc0200506",
+    "epc_after": "0xffffffffc0200508",
+    "instruction_bytes": 2,
+    "frame": "0xffffffffc0205a90",
+    "sp": "0xffffffffc0205bb0",
+    "status_at_entry": "0x8000000200006100",
+    "status_after_sret": "0x8000000200006020",
+    "gpr_checked": 32,
+    "passed": true
+  },
+  {
+    "case": 1,
+    "cause": "0x3",
+    "epc_before": "0xffffffffc02006e6",
+    "epc_after": "0xffffffffc02006ea",
+    "instruction_bytes": 4,
+    "frame": "0xffffffffc0205a90",
+    "sp": "0xffffffffc0205bb0",
+    "status_at_entry": "0x8000000200006100",
+    "status_after_sret": "0x8000000200006020",
+    "gpr_checked": 32,
+    "passed": true
+  },
+  {
+    "case": 2,
+    "cause": "0x2",
+    "epc_before": "0xffffffffc02008c8",
+    "epc_after": "0xffffffffc02008ca",
+    "instruction_bytes": 2,
+    "frame": "0xffffffffc0205a90",
+    "sp": "0xffffffffc0205bb0",
+    "status_at_entry": "0x8000000200006100",
+    "status_after_sret": "0x8000000200006020",
+    "gpr_checked": 32,
+    "passed": true
+  },
+  {
+    "case": 3,
+    "cause": "0x2",
+    "epc_before": "0xffffffffc0200aa8",
+    "epc_after": "0xffffffffc0200aac",
+    "instruction_bytes": 4,
+    "frame": "0xffffffffc0205a90",
+    "sp": "0xffffffffc0205bb0",
+    "status_at_entry": "0x8000000200006100",
+    "status_after_sret": "0x8000000200006020",
+    "gpr_checked": 32,
+    "passed": true
+  }
+]

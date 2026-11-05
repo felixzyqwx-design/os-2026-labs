@@ -23,6 +23,7 @@ struct pmm_manager {
 };
 extern struct Page *pages;
 extern size_t npage;
+extern uint64_t va_pa_offset;
 extern const size_t nbase;
 extern const struct pmm_manager *pmm_manager;
 #define SetPageReserved(p) ((p)->flags |= 1UL)

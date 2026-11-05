@@ -1,75 +1,47 @@
-# OS 2026 Labs
+# Lab 3：中断与异常
 
-操作系统课程 Lab 2：物理内存管理。此 `lab2` 分支只保存本次实验；Lab 1 的最终版本在独立的 [`lab1` 分支](https://github.com/felixzyqwx-design/os-2026-labs/tree/lab1)。
+邹瑛琦（2412744）、丁子昂（2411130）。
 
-## 小组成员
+代码来自 2026-11-04 核对的课程 Lab 3 官方骨架（包内目录 `lab3_new`），选择性继承 Lab 2 的物理内存初始化与分配器实现。
 
-- 邹瑛琦（2412744）
-- 丁子昂（2411130）
+## 功能
 
-## 目录
-
-| 目录 | 内容 |
-| --- | --- |
-| [`code/`](code/) | Lab 2 完整源码与构建脚本 |
-| [`report/`](report/) | [实验报告](report/report.md)、[关键提示词](report/prompt.md)、[AI 协作过程](report/ai-process.md)、[分配器复核](report/allocator-review.md)、[构建与运行核验](report/verification.md) |
-
-构建产物 `code/bin/`、`code/obj/` 不纳入版本管理。
+- 补全 Trap 现场恢复和汇编到 C 的调用，保持官方现场布局与保存逻辑。
+- 实现时钟中断、其他中断分类、未知原因输出，以及 16/32 位断点和非法指令返回。
+- 默认使用 Best-Fit；可通过 `PMM=first_fit` 选择 First-Fit。保留 Lab 3 内存管理中的中断保护与原子位操作。
+- 默认每 100 次时钟中断输出一次，累计输出 10 次后关机。10 是本组实现选择，网页没有给出阈值数值；可用 `DEFS+=-DSHUTDOWN_AFTER=2` 更改。
 
 ## 构建与运行
 
-在已配置 RISC-V 工具链、QEMU、GNU Make 和 Git Unix 工具的 PowerShell 中进入 `code/` 后，默认构建 Best-Fit：
+在已有 WSL Ubuntu 环境进入 `code/`：
 
-```powershell
-mingw32-make -B
-qemu-system-riscv64 -machine virt -nographic -bios default -kernel .\bin\ucore.img
-```
-
-输出 `best_fit_pmm_manager` 和 `check_alloc_page() succeeded!` 表示默认自检通过。按 `Ctrl+C` 结束 QEMU。Buddy 模式可用 `mingw32-make PMM=buddy` 构建，`mingw32-make` 恢复 Best-Fit；构建配置变化会自动使目标文件重新编译。原有 `DEFS=-DPMM_BUDDY` 方式仍可使用。初次 Windows 运行记录见[核验记录](report/verification.md)。
-
-## WSL / Linux 复测
-
-在仓库根目录进入 `code/` 后：
-
-```sh
+```bash
 make
 make qemu
-make PMM=buddy
-make qemu PMM=buddy
-make PMM=first_fit
-make qemu PMM=first_fit
-make
 make grade
 ```
 
-每个 QEMU 会持续运行，先按 `Ctrl+A`，松开后按 `X` 退出，再执行下一条命令。评分使用独立临时副本，保留原有测试；评分原始内核输出保存在 `code/.qemu.out`。默认 Best-Fit 的预期评分为 `Total Score: 20/20`，该分数不覆盖 Buddy 或 QEMU 源码调试任务。
+调试用两个终端分别执行 `make debug`、`make gdb`。本机 `riscv64-unknown-elf-gdb` 已有包装入口，实际使用 gdb-multiarch。QEMU 使用 `-kernel` 装载；官方评分脚本只同步这一装载参数，原断言、输出判据和分值保留。
 
-从仓库根目录运行自动复测，输出目录自行指定：
+## 补充验证
 
-```sh
-python3 report/scripts/verify_lab2.py --out /tmp/lab2-checks
-python3 code/tools/tests/run_host.py --out /tmp/lab2-host-checks
-python3 report/scripts/check_page_init.py --out /tmp/lab2-page-checks
-python3 report/scripts/check_mapping.py --out /tmp/lab2-mapping-checks
+以下脚本在临时副本注入测试，输出目录由调用者指定：
+
+```bash
+python3 tools/tests/run_lab3.py --mode full --out /tmp/lab3-full
+python3 tools/tests/run_lab3.py --mode boot --out /tmp/lab3-boot
+python3 tools/tests/debug_lab3.py --mode exceptions --out /tmp/lab3-gdb-exceptions
+python3 tools/tests/debug_lab3.py --mode timer --out /tmp/lab3-gdb-timer
+python3 tools/tests/run_host_regression.py --out /tmp/lab3-first-fit
+python3 tools/tests/check_build_switch.py --out /tmp/lab3-build-switch
 ```
 
-自动复测覆盖不同 RAM 配置、模式切换与官方评分；主机测试用真实分配器源码配合独立占用记录执行两万次操作，并启用 ASan/UBSan。内存边界检查只在临时副本改写 DTB 查询返回值。映射检查读取客体 `satp`、页表项并核对虚实地址；它不代替 QEMU 源码级 TLB 调试。脚本需要 Linux/WSL 中已有的 GCC、RISC-V 工具链、GDB、QEMU 和 Python 3。
+本轮结果：官方评分 100/100；Best-Fit/First-Fit 内核探针、默认 10 次输出关机、64/256 MiB 内存边界、配置切换，以及 4 次异常和 2 次时钟的 GDB 现场验证均通过。主机回归仅验证 First-Fit 链表行为，不能代替 RV64 内核验证。
 
-## QEMU 源码级页表与 TLB 调试
+## 报告与证据
 
-另外准备官方 QEMU 8.2.2 的独立调试构建，启用 `--enable-debug --enable-tcg-interpreter`，使用 `-O0 -g3`，保留源码目录。TCI 让两次加载的命中和未命中路径都能在 C 层观察；它用于本次功能调试，不用于评估硬件 TLB 性能。构建配置与源码散列见 [构建记录](report/evidence/2026-10-25-qemu-build-manifest.json)。
+[实验报告](report/report.md)包含两个模块的 spec、实现说明、两处正文思考、测试调试、实际问题和 OS 原理联系。[关键提示词](report/prompt.md)按实现与测试分别记录，并标明提炼稿来源。三张配图及其原始证据见 [report/evidence](report/evidence/README.md)。
 
-在本机 WSL 的仓库根目录运行：
+从 `code/` 可执行 `sh ../report/scripts/verify.sh /tmp/lab3-reproduction` 复现十类检查。图片生成脚本使用 Pillow，需要可显示中文的字体。本年度旧 Challenge 已取消，范围说明保留在报告中。
 
-```sh
-python3 report/scripts/debug_qemu_mmu.py \
-  --qemu /home/felix/oslab-tools/qemu-8.2.2/build/qemu-system-riscv64 \
-  --source /home/felix/oslab-tools/qemu-8.2.2 \
-  --out /tmp/lab2-mmu-check
-```
-
-其他机器应将前两个参数换成对应的调试二进制与源码路径。脚本协调宿主 GDB 和客体 GDB，在临时客体 RAM 中分别执行 Bare/Sv39 的两条 `ld` 指令，检查首次未命中、翻译与填充、再次命中，以及加载值；完成后恢复现场并清理本次 QEMU。
-
-本轮实际数据为 `0xffffffffc1004000 → 0x81004000`，启动页表在根层遇到 1 GiB 叶子，只读一个 PTE；两次加载均读得 `0x1122334455667788`。八条结构化记录见 [MMU 结果](report/evidence/2026-10-25-mmu-host-summary.json)，完整的[宿主日志](report/evidence/2026-10-25-mmu-host-gdb.txt)与[客体日志](report/evidence/2026-10-25-mmu-guest-gdb.txt)分别保存。
-
-实验指导书：[课程网站](http://oslab.mobisys.top/lab2026/_book/)。
+本实验使用独立的 `lab3` 分支，代码和报告一同提交。

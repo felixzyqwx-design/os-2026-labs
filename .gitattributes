@@ -1,5 +1,9 @@
 # Command transcripts preserve the whitespace emitted by the tools.
 report/evidence/*.txt -whitespace
+# Keep recorded evidence hashes stable across Windows and Linux checkouts.
+report/evidence/** -text -whitespace
+# Kernel sources must stay usable directly from WSL after a Windows checkout.
+code/** text eol=lf
 *.sh text eol=lf
 *.py text eol=lf
 Makefile text eol=lf

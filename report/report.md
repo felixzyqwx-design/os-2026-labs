@@ -1,177 +1,222 @@
-# Lab 2：物理内存管理与地址翻译
+# Lab 3 实验报告：中断与异常
 
-小组成员：邹瑛琦（2412744）、丁子昂（2411130）  
-实验与复核日期：2026-10-21 至 2026-10-25。
+小组：邹瑛琦（2412744）、丁子昂（2411130）
 
-## 1. 实验思路与任务规范
+实验日期：2026-11-04
 
-这次实验先回答“哪些物理页可以分配”，再回答“怎样分配和回收连续页”，最后观察一次访存怎样经过页表和 TLB。我们一起完成并复核了内存初始化、Best-Fit、Buddy，以及 QEMU 源码调试。启动链为：OpenSBI → `kern_entry` 建立引导映射和栈 → `kern_init` 解析 DTB → `pmm_init` 注册空闲页并运行分配器自检。
+## 1. 实验目标与整体流程
 
-任务规范先写输入、目标行为和不能破坏的条件，再据此写提示词与测试。完整提示词及整理来源见 [prompt.md](prompt.md)。
+这次实验要让内核在发生中断或异常后，保存现场、完成处理，再恢复到原来的执行流。我俩一起协作，使用 AI 辅助实现和测试设计，先补足 Lab 2 的内存管理依赖，再完成汇编入口与恢复，最后处理时钟、断点和非法指令。
 
-| 任务 | spec 中的主要约束 | 提示词 | 验证方法 |
-| --- | --- | --- | --- |
-| `page_init` | 读取 DTB；保留固件、内核和描述符；只登记完整空闲页 | P2 | 内核自检、课程测试、7 项边界检查 |
-| First-Fit 分析 | 解释四个核心函数、拆分与合并，回答改进问题 | P3 | 阅读原实现，并切换 First-Fit 启动 |
-| Best-Fit | 选最小足够块；维护链表和计数；保留给定检查函数 | P4 | 默认启动、课程评分、独立占用模型 |
-| Buddy 实现 | 分阶链表、向上取整、拆分、同阶伙伴合并 | P5 | 独立管理器启动 |
-| Buddy 测试 | 实现与测试分开规定；覆盖对齐、容量、计数及合并 | P6 | 内核自检、固定种子压力序列和耗尽回收 |
-| 页表与 TLB 调试 | 实际执行访存；记录 QEMU 调用、分支、翻译及命中情况 | P8、P9 | 双 GDB，比较 Bare 和 Sv39 |
+本次使用当前课程 Lab 3 骨架。练习有两个功能模块，需补全 `RESTORE_ALL`、`__alltraps`、`interrupt_handler()`、`exception_handler()`。正文还有 stvec 编码兼容与 `do { ... } while (0)` 两处思考。当前指导书及助教通知已取消旧版 Challenge，本年度没有对应实现题。
 
-## 2. 发现物理内存并建立页描述符
-
-实现位于 [`page_init`](../code/kern/mm/pmm.c)，保留了 `lab2` 和学号注释。`dtb_init` 解析 `/memory` 节点后，`page_init` 读取基址和容量。当前 `pa2page` 的索引约定以 `DRAM_BASE = 0x80000000` 为起点，因此基址必须与之相符；零容量、地址加法溢出、容量不足以放下内核或描述符时直接报错。
-
-初始化分为三步：
-
-1. 将 DTB 末端限制在 `PHYSICAL_MEMORY_END = 0x88000000` 内，设置虚实地址偏移。`npage = PPN(mem_end)` 是物理页号上界，描述符数量为 `npage - nbase`，不能把 `npage` 直接理解成 RAM 页数。
-2. 将 `pages` 放在链接符号 `end` 后的第一个页边界，先把所描述的页全部标为保留。`Page` 数组存的是引用计数、标志和链表节点，数组本身也占用 RAM。
-3. 将描述符末端向上对齐、内存末端向下对齐，只把二者之间非空的完整页区间交给 `init_memmap`。若没有完整空闲页，就不调用 `init_memmap(0)`。
-
-128 MiB 配置下，本轮默认 Best-Fit 镜像打印 RAM 范围 `[0x80000000, 0x88000000)`、空闲范围 `[0x80347000, 0x88000000)`。起点来自内核与描述符的实际大小，不能写死。64 MiB 配置正常启动；256 MiB 配置中 DTB 报告更大 RAM，但本内核仍只管理至上述上限。
-
-对硬件内存发现思考题，我们的理解是：操作系统通常从固件或引导协议接收内存布局；本实验使用 QEMU 生成的 DTB。直接试写物理地址可能碰到设备，也不能可靠判断所有 RAM。若扩展到多段 RAM，应解析多个区间并排除保留区。本次未实现额外的硬件探测器。
-
-## 3. 连续页分配与回收
-
-### 3.1 First-Fit：取第一个足够大的块
-
-课程已提供 [`default_pmm.c`](../code/kern/mm/default_pmm.c)。四个核心函数的职责如下：
-
-| 函数 | 作用 |
-| --- | --- |
-| `default_init` | 初始化空闲链表头，将空闲页计数置零 |
-| `default_init_memmap` | 清理可用页的保留状态，在连续区间首页记录长度，按地址登记空闲块 |
-| `default_alloc_pages` | 从头寻找首个足够大的块，摘下后切出请求页数，把余块放回链表，扣减计数 |
-| `default_free_pages` | 按地址插回释放区间，与相邻前块、后块合并，恢复计数 |
-
-例如，地址依次递增的空闲块大小为 8、4、10 页，申请 3 页时 First-Fit 选择 8 页块，留下 5 页；Best-Fit 则选择 4 页块，留下 1 页。地址有序有利于判断相邻关系，分配策略决定从哪些块中选择。
-
-First-Fit 可以改进。next-fit 从上次结束处继续找，能减少反复从低地址开始搜索；分级链表或大小索引能减少查找开销，但需要维护额外状态。这些改动都不能保证消除外部碎片。
-
-### 3.2 Best-Fit：选择最小足够块
-
-[`best_fit_pmm.c`](../code/kern/mm/best_fit_pmm.c) 实现六个管理器回调及注册结构：`init`、`init_memmap`、`alloc_pages`、`free_pages`、`nr_free_pages`、`check`。`pmm.c` 默认选择 `best_fit_pmm_manager`，课程给定的 `basic_check` 和 `best_fit_check` 保持原样。
-
-分配时完整扫描地址有序链表，用 `property >= n` 筛出候选，再保留其中最小的一块；相同大小时保留先遇到的低地址块。选中后清除原首页的空闲属性，余块建立新的首页、长度和链表节点。释放时先按地址插入，再分别检查前后块是否物理相邻，合并后清除被吸收首页的属性。每次分配、回收都同步维护 `nr_free`。
-
-Best-Fit 尽量保留大块，但可能留下难以利用的小块，而且本实现每次都要扫描完整链表。可以增加按大小的索引减少搜索，代价是同时维护大小索引和地址关系。本次保留地址有序链表，便于检查合并过程。
-
-### 3.3 Buddy：按 2 的幂分阶管理
-
-[`buddy_pmm.c`](../code/kern/mm/buddy_pmm.c) 为 0～17 阶分别建立链表，第 `k` 阶的块有 `2^k` 页。初始化时，根据描述符索引的对齐情况和剩余长度，逐段拆出尽可能大的合法块，因此无需空闲区起点恰好位于大块边界。
-
-`alloc_pages(n)` 将请求向上取整，找到相应或更高阶的空闲块，再逐级对半拆分。`free_pages(base,n)` 根据 `index XOR 2^k` 找伙伴，只有伙伴在范围内、标为空闲且大小相同才合并。首页 `property` 保存实际容量，空闲计数也按容量变化：申请 3 页占 4 页，申请 5 页占 8 页，多出的部分是内部碎片。
-
-释放校验比较的是取整后的容量。例如 3 和 4 都对应 4 页，当前记录不能区分这两个原始请求；调用者仍应传回原申请页数。若要校验原始请求，还需另存请求长度。
-
-Buddy 内核自检覆盖 1、3、5 页请求、零页及超过支持阶数的请求，并遍历链表核对大小、对齐、空闲总页数，以及没有留下可合并的同阶伙伴。只检查“释放后页数恢复”不够，因为两个小块一直分开也能保持计数正确。
-
-我们又用真实分配器 C 源码配合独立占用数组，对 Best-Fit 和 Buddy **各执行 20,000 次固定种子操作**。初始范围从描述符索引 3 开始，共 3001 页；每次检查返回块不越界、不重叠及页数守恒，Best-Fit 还与独立计算的最小足够空闲段比较。之后逐页耗尽，再逆序回收并重跑管理器检查。ASan/UBSan 运行通过。这补充了交错分配与回收的检查；RISC-V 启动和页表行为仍由 QEMU 验证。
-
-## 4. 用两个 GDB 观察页表与 TLB
-
-### 4.1 调试对象和访存指令
-
-普通宿主 GDB 调试 QEMU 的 C 源码，`gdb-multiarch` 通过远程接口调试客体 RISC-V。调试版采用官方 QEMU 8.2.2 源码，保留独立构建，不替换系统 QEMU。启用 `--enable-debug --enable-tcg-interpreter` 和 `-O0 -g3`，使本次两次加载的命中、未命中路径都可在 C 层观察；构建配置和散列见[构建记录](evidence/2026-10-25-qemu-build-manifest.json)。
-
-客体 GDB 在暂未使用的 RAM 中放置 `sfence.vma; ld t0,0(t1); ld t2,0(t1); ebreak`，并在 `ebreak` 前设硬件断点。先在 `satp=0` 的 Bare 状态执行，再到高地址 `kern_init` 处执行 Sv39 版本。目标数据为 `0x1122334455667788`，两次加载均得到该值。探针完成后恢复被借用内存、寄存器和 PC，内核源码无需加入测试指令。
-
-### 4.2 一次 Sv39 翻译的实际数值
-
-目标虚拟地址为 `0xffffffffc1004000`。此时：
+初始化先清理 BSS、读取 DTB、初始化控制台，再设置 Trap 入口并初始化物理内存。官方 `init.c` 在内存初始化前后各调用一次 `idt_init()`；随后 `clock_init()` 设置定时器和 `sie` 中的时钟使能位，最后由 `intr_enable()` 打开 `sstatus.SIE`。
 
 ```text
-satp             = 0x8000000000080205
-root physical    = 0x80205000
-VPN[2]           = 511
-PTE address      = 0x80205000 + 511 * 8 = 0x80205ff8
-PTE              = 0x200000cf
-physical address = 0x81004000
+执行内核代码
+  → 硬件记录 sepc、scause、stval 和 sstatus
+  → __alltraps：SAVE_ALL 保存寄存器与 CSR
+  → a0 = trapframe 地址，调用 trap()
+  → trap_dispatch() 按原因分发
+  → interrupt_handler() / exception_handler()
+  → __trapret：RESTORE_ALL 恢复现场
+  → sret 按 sepc 和 sstatus 返回
 ```
 
-`get_physical_address` 先由 `satp` 取得模式和根页表物理地址，再检查虚拟地址高位，按 VPN 索引读取 PTE。这个 PTE 的 V、R、W、X、A、D 位为 1，根层就遇到有效叶子，且满足大页对齐要求，所以本次只读了 **1 个 PTE**，没有继续查下两层。根层叶子覆盖 1 GiB，物理地址计算为：
+硬件不会自动把所有通用寄存器压栈，这部分由入口汇编完成。本实验运行在 QEMU 模拟的 RV64 单 hart 环境，实际验证的是 S 态内核发生 Trap 后返回 S 态。
 
-```text
-PA = 0x80000000 | (VA & 0x3fffffff) = 0x81004000
+环境沿用 WSL2 Ubuntu：RISC-V GCC 13.2.0、Make 4.3、QEMU 8.2.2、gdb-multiarch。代码在本仓库 `code/`，关键提示词见 [prompt.md](prompt.md)，原始验证记录见 [evidence/README.md](evidence/README.md)。
+
+## 2. Lab 2 继承与启动接入
+
+本部分的 spec 是：在 Lab 3 的接口和同步机制下，提供正确的可用物理页范围与分配器，能够通过框架原有自检。
+
+`page_init()` 从 DTB 取得内存基址和容量，检查范围后按当前映射支持的 `0x88000000` 上限裁剪；在内核末尾按页对齐放置 `Page` 描述符，先把管理范围内的页标记为保留，再把描述符数组之后的完整物理页交给分配器。这样 OpenSBI、内核和描述符自身都不会被当作空闲页。
+
+Best-Fit 维护按地址排列的空闲块，申请时查找最小的足够块，拆分余量；释放时与地址相邻的前后块合并。默认选 Best-Fit，也保留 `PMM=first_fit`。First-Fit 继承了 Lab 2 已定位的两处尾插 `break` 修复。
+
+继承时只取必要实现，保留 Lab 3 的 `Page` 原子标志接口，以及 `alloc_pages/free_pages/nr_free_pages` 的中断保存恢复。启动部分使用专门入口节和过渡恒等映射，保留骨架中栈顶完整地址的计算；QEMU 使用本机可工作的 `-kernel` 装载。
+
+实现提示词 [P1](prompt.md#p1) 先列出继承位置、内存边界与不可覆盖的 Lab 3 接口。验收同时使用两种分配器的内核自检、分配回收守恒，以及 64/256 MiB 内存配置；256 MiB 配置仍按当前映射上限管理 128 MiB。
+
+## 3. 功能模块一：现场恢复与 Trap 入口
+
+### 3.1 Spec 与提示词
+
+输入是 `SAVE_ALL` 已建立的 Trap frame；输出是可供 C 处理函数访问的现场，以及处理后能由 `sret` 继续执行的状态。约束是保持 `SAVE_ALL`、`struct trapframe` 和 `trap(struct trapframe *tf)` 签名不变。
+
+写 spec 时，我们先把实际偏移列清楚，再要求 AI 实现恢复顺序。实现稿见 [P2](prompt.md#p2)，独立测试稿见 [P3](prompt.md#p3)。两稿分别描述“应该怎样恢复”和“怎样观察恢复是否正确”。
+
+### 3.2 Trap frame 与 RESTORE_ALL
+
+RV64 的每个槽为 8 字节，共 36 个槽，占 288 字节，仍保持栈的 16 字节对齐。
+
+| 内容 | 槽号 | 字节偏移 |
+| --- | --- | --- |
+| x0～x31 | 0～31 | 0～248 |
+| 原始 sp，即 x2 | 2 | 16 |
+| sstatus | 32 | 256 |
+| sepc | 33 | 264 |
+| stval（结构中名为 badvaddr） | 34 | 272 |
+| scause | 35 | 280 |
+
+`SAVE_ALL` 先通过 `sscratch` 留住原 sp，再减小 sp 分配 frame，最后把原 sp 放进槽 2。因此恢复时不能提前加载 x2，否则后续加载就会离开当前 frame。`RESTORE_ALL` 先用临时寄存器读取并写回 `sstatus/sepc`，随后恢复通用寄存器，最后执行 `LOAD x2, 2*REGBYTES(sp)`。x0 的值由硬件固定为零；scause 和 stval 用于诊断，无须作为返回执行状态写回。
+
+### 3.3 __alltraps、__trapret 与 sret
+
+`SAVE_ALL` 后的 sp 正是 frame 地址。入口执行 `mv a0, sp`，按 RISC-V ABI 把它作为第一个参数，再执行 `jal trap`。C 函数返回时 sp 应仍指向同一个 frame，于是可以继续恢复。
+
+```asm
+__alltraps:
+    SAVE_ALL
+    mv a0, sp
+    jal trap
+__trapret:
+    RESTORE_ALL
+    sret
 ```
 
-因此 Sv39 的“三层结构”不意味着每次都读取三层。一般查表时，循环从 VPN[2] 向 VPN[0] 推进，PTE 地址为当前页表基址加索引乘 8；遇到非叶子，就以 PTE 的物理页号左移 12 位作为下一级页表基址。本次根层已是大页叶子，循环直接完成翻译。无效 PTE、权限不符或大页未对齐会转入失败处理。图 1 汇总了翻译现场与两次加载的区别。
+进入 S 态 Trap 时，硬件把原 SIE 保存到 SPIE、清零 SIE，并用 SPP 记录来源。恢复保存的状态后，`sret` 按 SPP 选择返回特权级，把 SPIE 送回 SIE，并按 sepc 取回执行位置。因此恢复代码保留保存值，不额外强制修改 SPP。
 
-### 4.3 先查 TLB，未命中才进入翻译
+## 4. 功能模块二：中断与异常处理
 
-本次 TCI 数据加载的调用路径为：
+### 4.1 Spec 与提示词
 
-```text
-tci_qemu_ld → helper_ldq_mmu → do_ld8_mmu → mmu_lookup → mmu_lookup1
-  未命中 → victim_tlb_hit；仍未命中 → tlb_fill
-         → riscv_cpu_tlb_fill → get_physical_address
-         → tlb_set_page → 完成本次加载
-  命中   → 使用已有 fulltlb/宿主地址信息完成加载
+输入是带有原因和返回地址的 `trapframe`；输出是相应提示、更新后的计数或返回位置，达到条件时关机。中断不能随意移动 epc；断点和非法指令要按编码长度跳过；其他异常只做框架要求的现场输出。两个处理函数的签名和既有 Trap 函数保持不变。
+
+实现稿 [P4](prompt.md#p4) 明确原因分类、每次时钟行为、关机条件和异常偏移；测试稿 [P5](prompt.md#p5) 单独列出边界、真实指令组合和退出判据。
+
+### 4.2 时钟和其他中断
+
+`trap_dispatch()` 通过 scause 最高位区分中断与异常；`interrupt_handler()` 再去掉最高位取得原因码。S 态时钟分支依次执行：
+
+1. 调用 `clock_set_next_event()`，让下一次时钟能够继续产生；
+2. `ticks` 加一，每到 `TICK_NUM=100` 的整数倍调用 `print_ticks()`；
+3. 每输出一次增加 `printed`，达到 `SHUTDOWN_AFTER` 后调用 `sbi_shutdown()`。
+
+网页要求达到阈值后关机，但没有给出数值，骨架也未定义该宏。我们采用可覆盖的默认值 10，即默认运行输出十次 `100 ticks` 后关机。`make DEFS+=-DSHUTDOWN_AFTER=2` 可以调整次数；这里的十次是实现选择。
+
+其他框架已定义的中断输出对应类型。未知中断输出原因码并调用 `print_trapframe()`，保留完整现场。测试中的软件中断和未知 cause 使用合成 frame 逐类检查，真实时钟另外通过连续运行验证。
+
+### 4.3 非法指令、断点与兜底
+
+`exception_handler()` 对非法指令和断点分别输出 `Illegal instruction at`、`Breakpoint at` 及 RV64 地址。读取 epc 处的首个 16 位半字后，在本实验覆盖的 16/32 位指令范围内按低两位判断：低两位不是 `11` 时跳过 2 字节，否则跳过 4 字节。
+
+```c
+tf->epc += ((*(volatile uint16_t *)tf->epc & 3) == 3) ? 4 : 2;
 ```
 
-在 QEMU 8.2.2 的 `accel/tcg/cputlb.c` 中，`mmu_lookup1` 的 `if (!tlb_hit(...))` 是本次观察的关键分支。第一次标签为 `0xffffffffffffffff`，进入 1711 行附近的未命中路径；第二次标签已匹配目标地址，越过该分支，进入 1721 行附近的 `fulltlb` 处理。`target/riscv/cpu_helper.c` 中，Bare 分支直接得到客体物理地址；Sv39 则读取 PTE、判定有效性与叶子、检查对齐和权限，再组合物理地址。这里的行号对应所用 8.2.2 源码。
+不能统一加 4：压缩断点只有 2 字节；也不能统一加 2：32 位指令会落到指令中间。我们实际执行了 `c.ebreak`、32 位 `ebreak`、16 位非法编码 `0x0000` 与 32 位非法编码 `0x0000007b`，四种情况均只触发一次并继续执行。其他异常调用 `print_trapframe()`，保持 epc，不扩展为通用缺页或错误恢复。
 
-![Bare 与 Sv39 源码调试结果](images/01-mmu-tlb.png)
+## 5. 中断保护与正文思考
 
-图 1：2026-10-25 双 GDB 实测数据的排版图，来源为 [8 条结构化观察](evidence/2026-10-25-mmu-host-summary.json)和[客体加载日志](evidence/2026-10-25-mmu-guest-gdb.txt)。Sv39 的页表叶子为 1 GiB，本次 `tlb_set_page` 的填充大小为 4096 字节，二者含义不同。
+### 5.1 stvec 低两位编码模式如何兼容旧版
 
-### 4.4 Bare 对比带来的理解
+旧入口地址要求四字节对齐，合法值的低两位都是 `00`。新编码把这两位作为 MODE，并继续令 `00` 表示 Direct，剩余位保存 BASE。旧地址写入新 stvec 后仍表示所有 Trap 跳到同一个入口，因此保留了原来的含义。
 
-| 观察项 | Bare | Sv39 |
+这种兼容指旧合法编码在新设计上仍可使用。新软件若使用 Vectored 等模式，还需要实现支持相应模式和对齐要求。本实验的 `__alltraps` 按四字节对齐，`idt_init()` 写入它的地址，使用 Direct 模式。
+
+### 5.2 do { ... } while (0) 有什么作用
+
+`local_intr_save(x)` 用这种写法把宏体包装为一条语句，调用后可以正常加分号，也能放在 `if/else` 中而不破坏 else 的配对。条件是 0，宏体只执行一次。
+
+```c
+if (need_protection)
+    local_intr_save(flag);
+else
+    flag = false;
+```
+
+宏结构负责语法组合；实际保护来自 `__intr_save()` 保存原 SIE 并按需关闭中断，以及 `__intr_restore()` 根据保存值恢复。原来关闭的中断不会被误开，嵌套内层退出时也不会提前打开外层关闭的中断。
+
+### 5.3 与原子位操作的关系
+
+内存分配涉及链表和计数的多步更新，所以框架在整个操作外保存、关闭并恢复本 hart 的中断。`atomic.h` 中的置位、清位等修改使用 AMO 指令，处理单个存储字的原子修改。单纯屏蔽本 hart 中断不能阻止其他 hart 访问共享数据；完整多核互斥还需要锁和相应内存顺序设计。
+
+## 6. 测试、源码调试与实际问题
+
+### 6.1 测试结果
+
+代码目录实际执行了 `make`、`make qemu`、`make grade`，均正常结束。补充探针在临时副本注入，日常启动的 `init.c` 不含测试调用。
+
+| 层次 | 用例与观察 | 本次结果 |
 | --- | --- | --- |
-| 客体访问地址 | `0x81004000` | `0xffffffffc1004000` |
-| 得到的客体物理地址 | `0x81004000` | `0x81004000` |
-| 页表遍历 | 无，直接返回地址 | 根层读取一个大页叶子 |
-| 本次 QEMU 软件 TLB | 首次未命中、填充，第二次命中 | 首次未命中、填充，第二次命中 |
+| 官方评分 | 现场/断点 35 分；非法指令 25 分；持续时钟 40 分 | 100/100 |
+| RV64 内核探针 | Best-Fit 与 First-Fit；寄存器哨兵；四种异常；原因分类 | 均通过 |
+| 合成 frame 边界 | 时钟计数 99/100/101/199/200；未知中断与其他异常 | 计数、输出及 epc 符合预期 |
+| 正常内核运行 | 默认十次输出后 SBI 关机 | 十行 `100 ticks`，退出码 0 |
+| 内存与中断状态 | 64/256 MiB 边界；SIE 开/关和嵌套保存恢复；页数守恒 | 均通过 |
+| 构建配置 | 同一目录 Best-Fit→First-Fit→Best-Fit，不执行 clean | 正确切换；参数不变时不重复编译 |
+| GDB 源码调试 | 四次异常、两次真实时钟，逐次检查 frame 与返回 | 六次均通过 |
+| 主机回归 | 实际 First-Fit 链表实现，测试替身头文件，ASan/UBSan | 当前实现通过；原尾插代码重现断言失败 |
+| 静态比较 | 56 个官方文件；保存逻辑、布局、既有函数及原检查 | 46 个保持原样，10 个为计划内修改 |
 
-最直观的现象是：Bare 没开启客体分页，QEMU 仍使用软件 TLB。原因是模拟器还要把客体地址对应到宿主 RAM，并缓存访问属性；真实 CPU 在 Bare 下不需要这一步客体页表翻译。QEMU 的软件缓存是实现模拟访存的机制，不能直接当成物理 CPU 的 TLB 结构。本次使用 TCI 便于看清 C 调用路径；原生 TCG 的命中快路径还可出现在生成的宿主指令中，这次调试也不用于比较硬件性能。
+主机回归用于检查链表，RV64 原子操作与 Trap 返回则由 QEMU 中的内核探针和 GDB 观察验证。本次没有使用物理开发板。
 
-调试中两处细节很有帮助。开始把宿主断点的启用时机放在内核取指，Bare 探针却已在此前执行，因而漏掉首轮观察；改在探针首次取指时启用条件断点，才完整记录两次加载。另一次 `next` 停在物理地址赋值的续行，变量尚未更新；改在赋值完成后读取，才得到 `0x81004000`。AI 帮助定位了这些时序和源码位置，最终以分支单步、变量值及客体加载结果核对。
+![官方评分日志摘录](images/01-grade.png)
 
-## 5. 构建、测试与修正
+图 1：由本次评分日志选取原始结果行排版。完整输出见 [grade.txt](evidence/grade.txt)，各评分用例的客体日志也保留在 evidence 中。
 
-初次记录使用 Windows 的 GCC 10.2、Make 4.2.1、QEMU 5.1；后续复测使用 WSL Ubuntu 24.04.1、RISC-V GCC 13.2、Make 4.3、系统 QEMU 8.2.2 和 GDB 15.1。源码级调试使用上述独立 QEMU 构建。环境、可执行命令和证据索引集中在[核验记录](verification.md)。
+![默认时钟运行日志](images/02-timer.png)
 
-| 实际检查 | 核验日 | 结果与范围 |
+图 2：默认启动日志末段与运行结果排版。十行输出后的退出状态来自运行器记录，原件见 [boot.txt](evidence/boot.txt) 和 [results.json](evidence/results.json)。
+
+### 6.2 GDB 怎样检查返回现场
+
+调试稿见 [P6](prompt.md#p6)。在 `__alltraps` 记录寄存器和 CSR；进入 `trap()` 时检查 a0 指向的 frame 内容与 288 字节偏移；在 `__trapret` 检查 C 调用后 sp 未变；到达 `sret` 前比较全部 32 个 GPR 槽及恢复后的 CSR，再在预期返回 PC 处检查 sp、权限和状态位。
+
+四次异常的 sepc 分别增加 2、4、2、4；两次时钟的 sepc 不变。时钟入栈状态 `0x8000000200006120` 中 SPP=1、SPIE=1、SIE=0，返回后的 `0x8000000200006022` 对应 SPIE=1、SIE=1、SPP=0；实际运行权限仍为 S 态。
+
+![GDB 返回现场数据](images/03-gdb.png)
+
+图 3：由 GDB 采集的 [异常记录](evidence/gdb-exceptions.json) 和 [时钟记录](evidence/gdb-timer.json) 排版，地址及状态值均来自原始数据。GDB 日志和自动检查脚本保留在仓库中。
+
+### 6.3 AI 辅助实现和验证中遇到的问题
+
+我们按 [P7](prompt.md#p7) 保存失败、定位和复测。未填写骨架导致的构建失败用于建立测试基线，以下列出实施中实际修正的问题。
+
+| 现象 | 定位过程 | 修正与复测 |
 | --- | --- | --- |
-| 构建、64/128/256 MiB 默认启动、切换 Buddy/First-Fit、恢复默认、评分及原始内核标记 | 10-25 | 14 项检查通过；课程评分 20/20，覆盖 Page Init 和 Best-Fit |
-| Best-Fit、Buddy 各 20,000 次操作及耗尽回收 | 10-22 | 独立占用模型检查通过，ASan/UBSan 无报错 |
-| `page_init` 7 项边界 | 10-22 | 非法信息报错、尾页截断和零完整空闲页符合预期 |
-| 客体页表与虚实地址字节核对 | 10-22 | `satp`、根 PTE 与指令字节对应 |
-| QEMU 源码级 Bare/Sv39 加载 | 10-25 | 首次未命中、翻译/填充、再次命中；加载值均正确 |
+| 官方原装载方式评分 0/100 | 三项均停在 OpenSBI，Next Address 为 0，尚未到内核，先检查装载参数 | grade.sh 只把 loader 行改为 `-kernel`，原判据和分值保留；三项复测 100/100 |
+| 指定 First-Fit，仍显示 Best-Fit | Makefile 选项未传到管理器选择；参数切换还可能复用旧目标文件 | 增加 PMM 条件选择并记录有效编译配置；同目录连续切换三次通过 |
+| GDB 在 sret 后报 `No registers` | stepi 跨过特权返回时，客体已继续运行到关机，调试脚本读不到寄存器 | 在预期返回 PC 放临时断点；保持内核代码不变，四种异常与两次时钟调试通过 |
 
-![分配器运行与评分结果](images/02-allocator-checks.png)
+失败摘录见 [failure-excerpts.txt](evidence/failure-excerpts.txt)，装载修改见 [grade-loader.diff](evidence/grade-loader.diff)。First-Fit 尾插问题是 Lab 2 已定位的继承修复，本次只作回归；没有把它记作本轮新出现的 AI 代码问题。
 
-图 2：2026-10-25 的默认、Buddy 运行日志与课程评分摘录排版图，完整日志见[核验记录](verification.md)。课程评分不包含 Buddy 与 QEMU 调试。
+## 7. 与 OS 原理的对应及本次未涉及内容
 
-本轮遇到并修正的问题如下；较早的入口节修正也保留在 [AI 过程记录](ai-process.md)中。
-
-| 现象 | 定位与修正 |
-| --- | --- |
-| QEMU 8.2.2 只到 OpenSBI，内核无输出 | GDB 和异常跟踪显示开启 `satp` 后在 `0x80200038` 发生取指页故障。原根页表只有高地址映射，补上根索引 2 的 1 GiB 恒等映射，覆盖切换后的低地址指令，随后跳到高地址入口 |
-| WSL 中评分脚本出现回车字符错误 | 将 shell/Python/Makefile 类文件约定为 LF，核对检出格式后重跑 |
-| 修改分配模式可能沿用旧目标文件 | Makefile 记录编译器与有效编译参数，配置变化自动触发重编译；默认、Buddy、First-Fit 连续切换验证通过 |
-| 原评分依赖固定副本路径，失败信息与清理不稳 | 使用独立临时副本、保留原课程检查、传回构建失败并清理本次进程；另用故意失败的编译命令验证失败不会被当成通过 |
-| GDB 把带引号的内核路径当作实际文件名 | 根据启动方式改用已知工作目录下的 `bin/ucore.img`，再跑完整双 GDB 流程 |
-| GDB 分离后 QEMU 留在另一进程组 | 记录本次 inferior PID，并匹配二进制与随机端口后清理；最终检查没有遗留本次探针进程 |
-
-内核自检打印完成后会循环等待，自动脚本在观察窗口结束时停止 QEMU；结束模拟器不表示内核自行关机。边界测试只在临时副本覆写 DTB 查询值，其中零完整空闲页用例跳过要求分配成功的常规自检，专门核对初始化后空闲计数为零。
-
-## 6. 与操作系统原理的联系
-
-| 实验对象 | 对应原理及关系 | 本实验中的具体范围 |
+| 原理知识 | 本实验中的含义与关系 | 实验范围 |
 | --- | --- | --- |
-| DTB、保留页与 `Page` 数组 | 物理内存布局、内核元数据管理 | 描述 RAM 并排除占用区；描述符不是页内容 |
-| First-Fit、Best-Fit | 连续空间分配与外部碎片 | 找到可用连续页块，并在释放时合并 |
-| Buddy | 分级分配、内部碎片 | 按 2 的幂管理容量；分配 3 页占用 4 页 |
-| 引导页表、`satp`、PTE | 虚实地址映射与权限 | 静态大页映射；物理页分配器本身不建立新的进程映射 |
-| QEMU 软件 TLB | 地址转换缓存与访问加速 | 观察功能路径，同时包含客体到宿主的模拟开销 |
+| 中断与异常 | 时钟是异步事件，断点和非法指令是同步异常；统一通过 Trap 入口分发 | 只对指定原因执行具体处理，其他原因输出现场 |
+| 上下文保存与恢复 | frame 保存被打断状态，C 调用后据此恢复执行 | 保存的是 Trap 现场，尚未在多个进程间切换 |
+| 特权级与返回 | sepc、SPP、SPIE、SIE 决定返回位置、权限与中断状态 | 本次实测 S 态返回 S 态，尚无用户进程 |
+| 时钟与调度 | 定时器重设产生连续节拍，ticks 可供调度机制使用 | 当前仅计数、打印和关机，没有时间片调度器 |
+| 临界区与原子操作 | 保存中断状态保护分配器多步更新，AMO 完成原子位修改 | 当前单 hart 验证，不等同于完整多核同步 |
+| 异常恢复 | 修改 epc 可以跳过已处理的特定异常指令 | 当前用于实验断点和非法编码；一般错误不能一律跳过 |
 
-进程间地址空间隔离、缺页后的按需分配、写时复制、页面置换与交换，以及多核并发下的分配器锁都很重要，但本实验没有实现。它们需要把物理页分配与进程、页表更新及异常处理结合起来。SLUB 对象分配器是指导书的选做 Challenge，本次未实现。
+OS 原理中还包括进程创建与生命周期、调度策略、用户地址空间和隔离、完整系统调用、缺页与换页、文件系统和设备 I/O，以及多核锁和内存顺序。这些在本次代码里没有形成完整功能。后续要实现进程切换，还需把当前保存的现场同进程控制块、内核栈和调度决策连接起来。
 
-## 7. 参考与附属记录
+## 8. 复现与资料
 
-- [Lab 2 练习要求](http://oslab.mobisys.top/lab2026/_book/lab2/lab2_2_1_exercise.html)、[实验报告要求](http://oslab.mobisys.top/lab2026/_book/lab2/lab2_5_labs_requirement.html)、[QEMU 页表与 TLB 调试要求](http://oslab.mobisys.top/lab2026/_book/lab2/lab2_4_qemu_mmu_debug.html)。
-- QEMU 8.2.2 官方源码：[cputlb.c](https://github.com/qemu/qemu/blob/v8.2.2/accel/tcg/cputlb.c)、[cpu_helper.c](https://github.com/qemu/qemu/blob/v8.2.2/target/riscv/cpu_helper.c)。
-- [关键提示词](prompt.md)、[AI 辅助分析与修正](ai-process.md)、[分配器复核](allocator-review.md)、[构建与运行核验](verification.md)。
+在现有 WSL 环境进入 `code/`：
+
+```bash
+make
+make qemu
+make grade
+python3 tools/tests/run_lab3.py --mode full --out /tmp/lab3-full
+python3 tools/tests/debug_lab3.py --mode exceptions --out /tmp/lab3-gdb-exceptions
+python3 tools/tests/debug_lab3.py --mode timer --out /tmp/lab3-gdb-timer
+```
+
+当前实现的补充用例可用 [verify.sh](scripts/verify.sh) 复现；脚本将测试输出保存在指定目录，不向正式启动代码注入探针。图片可用 [render_evidence.py](scripts/render_evidence.py) 从随附证据重新生成。
+
+课程资料于报告验收前再次读取，12 页正文和官方包与实施时一致。来源及散列保存在 [official-source.json](evidence/official-source.json)。主要参考如下：
+
+- [Lab 3 实验目的](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_1_goals.html)
+- [两个功能模块与继承要求](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_2_1_exercise.html)
+- [RISC-V 中断介绍与 stvec 思考](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_3_1_introduce.html)
+- [中断入口与现场布局](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_3_2_trapentry.html)
+- [中断关闭、开启与宏思考](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_3_5_atomic.html)
+- [实验报告要求](http://oslab.mobisys.top/lab2026/_book/lab3/lab3_4_lab_requirement.html)
+- [官方 Lab 3 代码包](http://oslab.mobisys.top/lab2026/lab3.zip)

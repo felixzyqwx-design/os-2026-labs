@@ -1,0 +1,236 @@
+{
+  "record_date": "2026-11-04",
+  "kind": "Recorded technical acceptance, before report composition",
+  "checks": [
+    {
+      "case": "full-best-fit",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "full-first-fit",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "boot-default",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "boot-64",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "boot-256",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "first-fit-tail",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "build-switch",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "official-grade",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "gdb-exceptions",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "case": "gdb-timer",
+      "exit": 0,
+      "passed": true
+    }
+  ],
+  "workspace": [
+    {
+      "entry": "make",
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "entry": "qemu",
+      "command": [
+        "make",
+        "qemu"
+      ],
+      "exit": 0,
+      "passed": true,
+      "tick_lines": 10
+    },
+    {
+      "entry": "grade",
+      "command": [
+        "make",
+        "grade"
+      ],
+      "exit": 0,
+      "passed": true
+    }
+  ],
+  "per_case": {
+    "full-best-fit": {
+      "mode": "full",
+      "build_exit": 0,
+      "build_timeout": false,
+      "qemu_exit": 0,
+      "qemu_timeout": false,
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "full-first-fit": {
+      "mode": "full",
+      "build_exit": 0,
+      "build_timeout": false,
+      "qemu_exit": 0,
+      "qemu_timeout": false,
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "boot-default": {
+      "mode": "boot",
+      "build_exit": 0,
+      "build_timeout": false,
+      "qemu_exit": 0,
+      "qemu_timeout": false,
+      "tick_output_count": 10,
+      "memory_map_expected": [
+        "0x80000000",
+        "0x88000000",
+        "0x80348000",
+        "0x88000000"
+      ],
+      "memory_map_actual": [
+        "0x80000000",
+        "0x88000000",
+        "0x80348000",
+        "0x88000000"
+      ],
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "boot-64": {
+      "mode": "boot",
+      "build_exit": 0,
+      "build_timeout": false,
+      "qemu_exit": 0,
+      "qemu_timeout": false,
+      "tick_output_count": 2,
+      "memory_map_expected": [
+        "0x80000000",
+        "0x84000000",
+        "0x802a8000",
+        "0x84000000"
+      ],
+      "memory_map_actual": [
+        "0x80000000",
+        "0x84000000",
+        "0x802a8000",
+        "0x84000000"
+      ],
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "boot-256": {
+      "mode": "boot",
+      "build_exit": 0,
+      "build_timeout": false,
+      "qemu_exit": 0,
+      "qemu_timeout": false,
+      "tick_output_count": 2,
+      "memory_map_expected": [
+        "0x80000000",
+        "0x88000000",
+        "0x80348000",
+        "0x88000000"
+      ],
+      "memory_map_actual": [
+        "0x80000000",
+        "0x88000000",
+        "0x80348000",
+        "0x88000000"
+      ],
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "first-fit-tail": [
+      {
+        "variant": "original",
+        "exit": -6,
+        "expected_failure": true,
+        "passed": true
+      },
+      {
+        "variant": "current",
+        "exit": 0,
+        "expected_failure": false,
+        "passed": true
+      }
+    ],
+    "build-switch": [
+      {
+        "case": 0,
+        "pmm": "best_fit",
+        "build_exit": 0,
+        "qemu_exit": 0,
+        "passed": true
+      },
+      {
+        "case": 1,
+        "pmm": "first_fit",
+        "build_exit": 0,
+        "qemu_exit": 0,
+        "passed": true
+      },
+      {
+        "case": 2,
+        "pmm": "best_fit",
+        "build_exit": 0,
+        "qemu_exit": 0,
+        "passed": true
+      }
+    ],
+    "official-grade": {
+      "mode": "official",
+      "build_exit": 0,
+      "build_timeout": false,
+      "grade_exit": 0,
+      "grade_timeout": false,
+      "passed": true,
+      "expected_failure_observed": false
+    },
+    "gdb-exceptions": {
+      "mode": "exceptions",
+      "gdb_exit": 0,
+      "qemu_exit": 0,
+      "observations": 4,
+      "passed": true
+    },
+    "gdb-timer": {
+      "mode": "timer",
+      "gdb_exit": 0,
+      "qemu_exit": 0,
+      "observations": 2,
+      "passed": true
+    }
+  },
+  "gdb_observations": {
+    "exceptions": 4,
+    "timer": 2
+  }
+}

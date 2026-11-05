@@ -1,4 +1,4 @@
-PROJ	:= lab2
+PROJ	:= lab3
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
@@ -35,12 +35,10 @@ CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CFLAGS	+= -g
 PMM ?= best_fit
-ifeq ($(PMM),buddy)
-CFLAGS += -DPMM_BUDDY
-else ifeq ($(PMM),first_fit)
+ifeq ($(PMM),first_fit)
 CFLAGS += -DPMM_FIRST_FIT
 else ifneq ($(PMM),best_fit)
-$(error Unsupported PMM '$(PMM)'; use best_fit, buddy or first_fit)
+$(error Unsupported PMM '$(PMM)'; use best_fit or first_fit)
 endif
 CFLAGS2 = $(CFLAGS) -D ucore_test
 CTYPE	:= c S
@@ -106,6 +104,7 @@ $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 
 KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
+			   kern/trap/ \
 			   kern/mm/ \
 			   kern/arch/
 
@@ -113,11 +112,12 @@ KSRCDIR		+= kern/init \
 			   kern/libs \
 			   kern/debug \
 			   kern/driver \
+			   kern/trap \
 			   kern/mm
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
-ifneq ($(filter test,$(MAKECMDGOALS)),)
+ifeq ($(MAKECMDGOALS),test)
 $(call add_files_cc2,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
 else
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
@@ -191,7 +191,7 @@ debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-machine virt \
 		-nographic \
 		-bios default \
-		-kernel $(UCOREIMG) \
+		-kernel $(UCOREIMG)\
 		-s -S
 
 gdb:
@@ -215,22 +215,21 @@ GRADE_GDB_IN	:= .gdb.in
 GRADE_QEMU_OUT	:= .qemu.out
 HANDIN			:= proj$(PROJ)-handin.tar.gz
 
-TOUCH_FILES		:=
+TOUCH_FILES		:= kern/trap/trap.c
 
 MAKEOPTS		:= --quiet --no-print-directory
 
 grade:
 	$(V)set -eu; \
-	rm -f '$(GRADE_QEMU_OUT)'; \
-	grade_tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/ucore-lab2-grade.XXXXXX"); \
+	grade_tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/ucore-lab3-grade.XXXXXX"); \
 	trap 'rm -rf "$$grade_tmp"' EXIT; \
-	tar --exclude=.git --exclude=.vscode --exclude=vcs --exclude=obj --exclude=bin --exclude=.qemu.out --exclude=.gdb.in -cf "$$grade_tmp/source.tar" .; \
+	tar --exclude=.git --exclude=obj --exclude=bin --exclude='.qemu.*.out' -cf "$$grade_tmp/source.tar" .; \
 	tar -C "$$grade_tmp" -xf "$$grade_tmp/source.tar"; \
 	rm "$$grade_tmp/source.tar"; \
 	python3 tools/inject.py "$$grade_tmp"; \
 	cd "$$grade_tmp"; \
 	grade_status=0; $(SH) tools/grade.sh || grade_status=$$?; \
-	if [ -f .qemu.out ]; then cp .qemu.out '$(CURDIR)/$(GRADE_QEMU_OUT)'; fi; \
+	for logfile in .qemu.*.out; do [ ! -f "$$logfile" ] || cp "$$logfile" '$(CURDIR)/'; done; \
 	exit $$grade_status
 
 touch:

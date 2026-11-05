@@ -1,0 +1,17 @@
+Lab 3 actual failure excerpts (2026-11-04)
+
+[Original official loader: grade.txt]
+  - trap entry, register restore, and breakpoint EPC: FAIL (0/35)
+  - illegal instruction EPC advance and return: FAIL (0/25)
+  - re-armed supervisor timer and repeated trap return: FAIL (0/40)
+Total Score: 0/100
+
+[Original official loader: qemu.GRADE_LAB3_CONTEXT.out]
+Domain0 Next Address      : 0x0000000000000000
+
+[First-Fit selection regression: 11-first-fit-selection-red/qemu.txt]
+memory management: best_fit_pmm_manager
+
+[GDB stepi over sret: 08-gdb-exceptions/gdb.txt]
+[Inferior 1 (process 1) exited normally]
+LAB3_GDB_FAIL error('No registers.')

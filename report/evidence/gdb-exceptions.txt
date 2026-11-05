@@ -1,0 +1,199 @@
+The target architecture is set to "riscv:rv64".
+0x0000000000001000 in ?? ()
+
+Breakpoint -1, __alltraps () at kern/trap/trapentry.S:103
+103	    SAVE_ALL
+
+Breakpoint -2, trap (tf=0xffffffffc0205a90) at kern/trap/trap.c:187
+187	    trap_dispatch(tf);
+
+Breakpoint -3, __trapret () at kern/trap/trapentry.S:112
+112	    RESTORE_ALL
+0xffffffffc020184a	112	    RESTORE_ALL
+0xffffffffc020184c	112	    RESTORE_ALL
+0xffffffffc0201850	112	    RESTORE_ALL
+0xffffffffc0201854	112	    RESTORE_ALL
+0xffffffffc0201856	112	    RESTORE_ALL
+0xffffffffc0201858	112	    RESTORE_ALL
+0xffffffffc020185a	112	    RESTORE_ALL
+0xffffffffc020185c	112	    RESTORE_ALL
+0xffffffffc020185e	112	    RESTORE_ALL
+0xffffffffc0201860	112	    RESTORE_ALL
+0xffffffffc0201862	112	    RESTORE_ALL
+0xffffffffc0201864	112	    RESTORE_ALL
+0xffffffffc0201866	112	    RESTORE_ALL
+0xffffffffc0201868	112	    RESTORE_ALL
+0xffffffffc020186a	112	    RESTORE_ALL
+0xffffffffc020186c	112	    RESTORE_ALL
+0xffffffffc020186e	112	    RESTORE_ALL
+0xffffffffc0201870	112	    RESTORE_ALL
+0xffffffffc0201872	112	    RESTORE_ALL
+0xffffffffc0201874	112	    RESTORE_ALL
+0xffffffffc0201876	112	    RESTORE_ALL
+0xffffffffc0201878	112	    RESTORE_ALL
+0xffffffffc020187a	112	    RESTORE_ALL
+0xffffffffc020187c	112	    RESTORE_ALL
+0xffffffffc020187e	112	    RESTORE_ALL
+0xffffffffc0201880	112	    RESTORE_ALL
+0xffffffffc0201882	112	    RESTORE_ALL
+0xffffffffc0201884	112	    RESTORE_ALL
+0xffffffffc0201886	112	    RESTORE_ALL
+0xffffffffc0201888	112	    RESTORE_ALL
+0xffffffffc020188a	112	    RESTORE_ALL
+0xffffffffc020188c	112	    RESTORE_ALL
+0xffffffffc020188e	112	    RESTORE_ALL
+0xffffffffc0201890	112	    RESTORE_ALL
+__trapret () at kern/trap/trapentry.S:114
+114	    sret
+
+Temporary breakpoint -4, probe_registers () at kern/init/probe_registers.S:50
+50	    sd x1, 264(sp)
+GDB_TRAP_OBSERVATION {"case": 0, "cause": "0x3", "epc_before": "0xffffffffc0200506", "epc_after": "0xffffffffc0200508", "instruction_bytes": 2, "frame": "0xffffffffc0205a90", "sp": "0xffffffffc0205bb0", "status_at_entry": "0x8000000200006100", "status_after_sret": "0x8000000200006020", "gpr_checked": 32, "passed": true}
+
+Breakpoint -1, __alltraps () at kern/trap/trapentry.S:103
+103	    SAVE_ALL
+
+Breakpoint -2, trap (tf=0xffffffffc0205a90) at kern/trap/trap.c:187
+187	    trap_dispatch(tf);
+
+Breakpoint -3, __trapret () at kern/trap/trapentry.S:112
+112	    RESTORE_ALL
+0xffffffffc020184a	112	    RESTORE_ALL
+0xffffffffc020184c	112	    RESTORE_ALL
+0xffffffffc0201850	112	    RESTORE_ALL
+0xffffffffc0201854	112	    RESTORE_ALL
+0xffffffffc0201856	112	    RESTORE_ALL
+0xffffffffc0201858	112	    RESTORE_ALL
+0xffffffffc020185a	112	    RESTORE_ALL
+0xffffffffc020185c	112	    RESTORE_ALL
+0xffffffffc020185e	112	    RESTORE_ALL
+0xffffffffc0201860	112	    RESTORE_ALL
+0xffffffffc0201862	112	    RESTORE_ALL
+0xffffffffc0201864	112	    RESTORE_ALL
+0xffffffffc0201866	112	    RESTORE_ALL
+0xffffffffc0201868	112	    RESTORE_ALL
+0xffffffffc020186a	112	    RESTORE_ALL
+0xffffffffc020186c	112	    RESTORE_ALL
+0xffffffffc020186e	112	    RESTORE_ALL
+0xffffffffc0201870	112	    RESTORE_ALL
+0xffffffffc0201872	112	    RESTORE_ALL
+0xffffffffc0201874	112	    RESTORE_ALL
+0xffffffffc0201876	112	    RESTORE_ALL
+0xffffffffc0201878	112	    RESTORE_ALL
+0xffffffffc020187a	112	    RESTORE_ALL
+0xffffffffc020187c	112	    RESTORE_ALL
+0xffffffffc020187e	112	    RESTORE_ALL
+0xffffffffc0201880	112	    RESTORE_ALL
+0xffffffffc0201882	112	    RESTORE_ALL
+0xffffffffc0201884	112	    RESTORE_ALL
+0xffffffffc0201886	112	    RESTORE_ALL
+0xffffffffc0201888	112	    RESTORE_ALL
+0xffffffffc020188a	112	    RESTORE_ALL
+0xffffffffc020188c	112	    RESTORE_ALL
+0xffffffffc020188e	112	    RESTORE_ALL
+0xffffffffc0201890	112	    RESTORE_ALL
+__trapret () at kern/trap/trapentry.S:114
+114	    sret
+
+Temporary breakpoint -5, probe_registers () at kern/init/probe_registers.S:203
+203	    sd x1, 264(sp)
+GDB_TRAP_OBSERVATION {"case": 1, "cause": "0x3", "epc_before": "0xffffffffc02006e6", "epc_after": "0xffffffffc02006ea", "instruction_bytes": 4, "frame": "0xffffffffc0205a90", "sp": "0xffffffffc0205bb0", "status_at_entry": "0x8000000200006100", "status_after_sret": "0x8000000200006020", "gpr_checked": 32, "passed": true}
+
+Breakpoint -1, __alltraps () at kern/trap/trapentry.S:103
+103	    SAVE_ALL
+
+Breakpoint -2, trap (tf=0xffffffffc0205a90) at kern/trap/trap.c:187
+187	    trap_dispatch(tf);
+
+Breakpoint -3, __trapret () at kern/trap/trapentry.S:112
+112	    RESTORE_ALL
+0xffffffffc020184a	112	    RESTORE_ALL
+0xffffffffc020184c	112	    RESTORE_ALL
+0xffffffffc0201850	112	    RESTORE_ALL
+0xffffffffc0201854	112	    RESTORE_ALL
+0xffffffffc0201856	112	    RESTORE_ALL
+0xffffffffc0201858	112	    RESTORE_ALL
+0xffffffffc020185a	112	    RESTORE_ALL
+0xffffffffc020185c	112	    RESTORE_ALL
+0xffffffffc020185e	112	    RESTORE_ALL
+0xffffffffc0201860	112	    RESTORE_ALL
+0xffffffffc0201862	112	    RESTORE_ALL
+0xffffffffc0201864	112	    RESTORE_ALL
+0xffffffffc0201866	112	    RESTORE_ALL
+0xffffffffc0201868	112	    RESTORE_ALL
+0xffffffffc020186a	112	    RESTORE_ALL
+0xffffffffc020186c	112	    RESTORE_ALL
+0xffffffffc020186e	112	    RESTORE_ALL
+0xffffffffc0201870	112	    RESTORE_ALL
+0xffffffffc0201872	112	    RESTORE_ALL
+0xffffffffc0201874	112	    RESTORE_ALL
+0xffffffffc0201876	112	    RESTORE_ALL
+0xffffffffc0201878	112	    RESTORE_ALL
+0xffffffffc020187a	112	    RESTORE_ALL
+0xffffffffc020187c	112	    RESTORE_ALL
+0xffffffffc020187e	112	    RESTORE_ALL
+0xffffffffc0201880	112	    RESTORE_ALL
+0xffffffffc0201882	112	    RESTORE_ALL
+0xffffffffc0201884	112	    RESTORE_ALL
+0xffffffffc0201886	112	    RESTORE_ALL
+0xffffffffc0201888	112	    RESTORE_ALL
+0xffffffffc020188a	112	    RESTORE_ALL
+0xffffffffc020188c	112	    RESTORE_ALL
+0xffffffffc020188e	112	    RESTORE_ALL
+0xffffffffc0201890	112	    RESTORE_ALL
+__trapret () at kern/trap/trapentry.S:114
+114	    sret
+
+Temporary breakpoint -6, probe_registers () at kern/init/probe_registers.S:356
+356	    sd x1, 264(sp)
+GDB_TRAP_OBSERVATION {"case": 2, "cause": "0x2", "epc_before": "0xffffffffc02008c8", "epc_after": "0xffffffffc02008ca", "instruction_bytes": 2, "frame": "0xffffffffc0205a90", "sp": "0xffffffffc0205bb0", "status_at_entry": "0x8000000200006100", "status_after_sret": "0x8000000200006020", "gpr_checked": 32, "passed": true}
+
+Breakpoint -1, __alltraps () at kern/trap/trapentry.S:103
+103	    SAVE_ALL
+
+Breakpoint -2, trap (tf=0xffffffffc0205a90) at kern/trap/trap.c:187
+187	    trap_dispatch(tf);
+
+Breakpoint -3, __trapret () at kern/trap/trapentry.S:112
+112	    RESTORE_ALL
+0xffffffffc020184a	112	    RESTORE_ALL
+0xffffffffc020184c	112	    RESTORE_ALL
+0xffffffffc0201850	112	    RESTORE_ALL
+0xffffffffc0201854	112	    RESTORE_ALL
+0xffffffffc0201856	112	    RESTORE_ALL
+0xffffffffc0201858	112	    RESTORE_ALL
+0xffffffffc020185a	112	    RESTORE_ALL
+0xffffffffc020185c	112	    RESTORE_ALL
+0xffffffffc020185e	112	    RESTORE_ALL
+0xffffffffc0201860	112	    RESTORE_ALL
+0xffffffffc0201862	112	    RESTORE_ALL
+0xffffffffc0201864	112	    RESTORE_ALL
+0xffffffffc0201866	112	    RESTORE_ALL
+0xffffffffc0201868	112	    RESTORE_ALL
+0xffffffffc020186a	112	    RESTORE_ALL
+0xffffffffc020186c	112	    RESTORE_ALL
+0xffffffffc020186e	112	    RESTORE_ALL
+0xffffffffc0201870	112	    RESTORE_ALL
+0xffffffffc0201872	112	    RESTORE_ALL
+0xffffffffc0201874	112	    RESTORE_ALL
+0xffffffffc0201876	112	    RESTORE_ALL
+0xffffffffc0201878	112	    RESTORE_ALL
+0xffffffffc020187a	112	    RESTORE_ALL
+0xffffffffc020187c	112	    RESTORE_ALL
+0xffffffffc020187e	112	    RESTORE_ALL
+0xffffffffc0201880	112	    RESTORE_ALL
+0xffffffffc0201882	112	    RESTORE_ALL
+0xffffffffc0201884	112	    RESTORE_ALL
+0xffffffffc0201886	112	    RESTORE_ALL
+0xffffffffc0201888	112	    RESTORE_ALL
+0xffffffffc020188a	112	    RESTORE_ALL
+0xffffffffc020188c	112	    RESTORE_ALL
+0xffffffffc020188e	112	    RESTORE_ALL
+0xffffffffc0201890	112	    RESTORE_ALL
+__trapret () at kern/trap/trapentry.S:114
+114	    sret
+
+Temporary breakpoint -7, probe_registers () at kern/init/probe_registers.S:509
+509	    sd x1, 264(sp)
+GDB_TRAP_OBSERVATION {"case": 3, "cause": "0x2", "epc_before": "0xffffffffc0200aa8", "epc_after": "0xffffffffc0200aac", "instruction_bytes": 4, "frame": "0xffffffffc0205a90", "sp": "0xffffffffc0205bb0", "status_at_entry": "0x8000000200006100", "status_after_sret": "0x8000000200006020", "gpr_checked": 32, "passed": true}
+LAB3_GDB_ALL_PASS

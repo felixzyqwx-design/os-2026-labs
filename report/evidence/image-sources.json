@@ -1,0 +1,154 @@
+[
+  {
+    "image": "01-grade.png",
+    "width": 1680,
+    "height": 450,
+    "sha256": "22f391c7395a346c02a75e4479f25b81cb14e63ff69498cdbd192ddd19f85a41",
+    "kind": "typeset actual evidence, not a terminal screenshot",
+    "sources": {
+      "grade.txt": "57a310651f93e80867bd58e8f837df6ab8f53f46abc4fe33279b967f157720e4"
+    },
+    "details": {
+      "selected_lines": [
+        "  - trap entry, register restore, and breakpoint EPC: PASS (35/35)",
+        "  - illegal instruction EPC advance and return: PASS (25/25)",
+        "  - re-armed supervisor timer and repeated trap return: PASS (40/40)",
+        "Total Score: 100/100"
+      ]
+    }
+  },
+  {
+    "image": "02-timer.png",
+    "width": 1680,
+    "height": 850,
+    "sha256": "010c774c43f68416fffeb32b898db9a58bd5345d315bccf4ccbd0e97efba3aac",
+    "kind": "typeset actual evidence, not a terminal screenshot",
+    "sources": {
+      "boot.txt": "3d65207b1c9a3f8aeecf2210a49a41bcf0c9457bf0487995bfec06799d696a35",
+      "results.json": "c070785b1fe7327313c923794e8e1be100c13a5bf5cf20e084d01e2c37c896e5"
+    },
+    "details": {
+      "selected_lines": [
+        "memory management: best_fit_pmm_manager",
+        "physical memory map: [0x0000000080000000, 0x0000000088000000), free: [0x0000000080348000, 0x0000000088000000)",
+        "check_alloc_page() succeeded!",
+        "satp virtual address: 0xffffffffc0206000",
+        "satp physical address: 0x0000000080206000",
+        "++ setup timer interrupts",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks",
+        "100 ticks"
+      ],
+      "workspace_result": {
+        "entry": "qemu",
+        "command": [
+          "make",
+          "qemu"
+        ],
+        "exit": 0,
+        "passed": true,
+        "tick_lines": 10
+      }
+    }
+  },
+  {
+    "image": "03-gdb.png",
+    "width": 1680,
+    "height": 790,
+    "sha256": "daf6048ad29710e7e115acc39315dd65959117d8a4250d6b22fdab0a1a4ae408",
+    "kind": "typeset actual evidence, not a terminal screenshot",
+    "sources": {
+      "gdb-exceptions.json": "c4780f4ba6449b037f6e6a515bb3cf4c14a83c583f1a6f78bdde57203b0cf8a5",
+      "gdb-timer.json": "baff9aa355d6c1d92e81f99d5c6a9be36fd485bd9a0988fbd1f87c5cf9d2bf81"
+    },
+    "details": {
+      "rows": [
+        {
+          "case": 0,
+          "cause": "0x3",
+          "epc_before": "0xffffffffc0200506",
+          "epc_after": "0xffffffffc0200508",
+          "instruction_bytes": 2,
+          "frame": "0xffffffffc0205a90",
+          "sp": "0xffffffffc0205bb0",
+          "status_at_entry": "0x8000000200006100",
+          "status_after_sret": "0x8000000200006020",
+          "gpr_checked": 32,
+          "passed": true
+        },
+        {
+          "case": 1,
+          "cause": "0x3",
+          "epc_before": "0xffffffffc02006e6",
+          "epc_after": "0xffffffffc02006ea",
+          "instruction_bytes": 4,
+          "frame": "0xffffffffc0205a90",
+          "sp": "0xffffffffc0205bb0",
+          "status_at_entry": "0x8000000200006100",
+          "status_after_sret": "0x8000000200006020",
+          "gpr_checked": 32,
+          "passed": true
+        },
+        {
+          "case": 2,
+          "cause": "0x2",
+          "epc_before": "0xffffffffc02008c8",
+          "epc_after": "0xffffffffc02008ca",
+          "instruction_bytes": 2,
+          "frame": "0xffffffffc0205a90",
+          "sp": "0xffffffffc0205bb0",
+          "status_at_entry": "0x8000000200006100",
+          "status_after_sret": "0x8000000200006020",
+          "gpr_checked": 32,
+          "passed": true
+        },
+        {
+          "case": 3,
+          "cause": "0x2",
+          "epc_before": "0xffffffffc0200aa8",
+          "epc_after": "0xffffffffc0200aac",
+          "instruction_bytes": 4,
+          "frame": "0xffffffffc0205a90",
+          "sp": "0xffffffffc0205bb0",
+          "status_at_entry": "0x8000000200006100",
+          "status_after_sret": "0x8000000200006020",
+          "gpr_checked": 32,
+          "passed": true
+        },
+        {
+          "case": 0,
+          "cause": "0x8000000000000005",
+          "epc_before": "0xffffffffc020009c",
+          "epc_after": "0xffffffffc020009c",
+          "instruction_bytes": 0,
+          "frame": "0xffffffffc0205ed0",
+          "sp": "0xffffffffc0205ff0",
+          "status_at_entry": "0x8000000200006120",
+          "status_after_sret": "0x8000000200006022",
+          "gpr_checked": 32,
+          "passed": true
+        },
+        {
+          "case": 1,
+          "cause": "0x8000000000000005",
+          "epc_before": "0xffffffffc020009c",
+          "epc_after": "0xffffffffc020009c",
+          "instruction_bytes": 0,
+          "frame": "0xffffffffc0205ed0",
+          "sp": "0xffffffffc0205ff0",
+          "status_at_entry": "0x8000000200006120",
+          "status_after_sret": "0x8000000200006022",
+          "gpr_checked": 32,
+          "passed": true
+        }
+      ]
+    }
+  }
+]

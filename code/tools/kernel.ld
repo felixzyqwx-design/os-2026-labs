@@ -12,7 +12,7 @@ SECTIONS
     . = BASE_ADDRESS;
 
     .text : {
-        *(.text.kern_entry)
+        KEEP(*(.text.kern_entry))
         *(.text .stub .text.* .gnu.linkonce.t.*)
     }
 
