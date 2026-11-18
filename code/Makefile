@@ -1,13 +1,13 @@
-PROJ	:= lab3
+PROJ	:= lab4
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
 
 V       := @
 
-#ifndef GCCPREFIX
+ifndef GCCPREFIX
 GCCPREFIX := riscv64-unknown-elf-
-#endif
+endif
 
 ifndef QEMU
 QEMU := qemu-system-riscv64
@@ -27,24 +27,18 @@ endif
 HOSTCC		:= gcc
 HOSTCFLAGS	:= -Wall -O2
 
-GDB		:= $(GCCPREFIX)gdb
+GDB		:= $(shell command -v $(GCCPREFIX)gdb 2>/dev/null || command -v gdb-multiarch)
 
 CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -std=gnu99 -Wno-unused -Werror 
-CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
+CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused
+CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CFLAGS	+= -g
-PMM ?= best_fit
-ifeq ($(PMM),first_fit)
-CFLAGS += -DPMM_FIRST_FIT
-else ifneq ($(PMM),best_fit)
-$(error Unsupported PMM '$(PMM)'; use best_fit or first_fit)
-endif
-CFLAGS2 = $(CFLAGS) -D ucore_test
 CTYPE	:= c S
+
 LD      := $(GCCPREFIX)ld
 LDFLAGS	:= -m elf64lriscv
-LDFLAGS	+= -nostdlib --gc-sections
+LDFLAGS	+= -nostdlib --gc-sections --print-gc-sections
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
@@ -72,7 +66,6 @@ listf_cc = $(call listf,$(1),$(CTYPE))
 
 # for cc
 add_files_cc = $(call add_files,$(1),$(CC),$(CFLAGS) $(3),$(2),$(4))
-add_files_cc2 = $(call add_files,$(1),$(CC),$(CFLAGS2) $(3),$(2),$(4))
 create_target_cc = $(call create_target,$(1),$(2),$(3),$(CC),$(CFLAGS))
 
 # for hostcc
@@ -106,22 +99,25 @@ KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
 			   kern/trap/ \
 			   kern/mm/ \
-			   kern/arch/
+			   kern/sync/ \
+			   kern/fs/ \
+			   kern/process \
+			   kern/schedule
 
 KSRCDIR		+= kern/init \
 			   kern/libs \
 			   kern/debug \
 			   kern/driver \
 			   kern/trap \
-			   kern/mm
+			   kern/mm \
+			   kern/fs \
+			   kern/process \
+			   kern/schedule
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
-ifeq ($(MAKECMDGOALS),test)
-$(call add_files_cc2,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
-else
 $(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
-endif
+
 KOBJS	= $(call read_packet,kernel libs)
 
 # create kernel target
@@ -141,6 +137,8 @@ $(call create_target,kernel)
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
+# $(UCOREIMG): $(kernel)
+#	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes/$(PROJ)/$(kernel)  --disable-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
 
 $(UCOREIMG): $(kernel)
 	$(OBJCOPY) $(kernel) --strip-all -O binary $@
@@ -150,17 +148,6 @@ $(call create_target,ucore.img)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 $(call finish_all)
-
-# Make normally ignores compiler option changes. Only update this stamp when
-# the effective compiler/flags change, so switching PMM rebuilds stale objects.
-.PHONY: FORCE
-FORCE:
-BUILD_CONFIG := $(OBJDIR)/.build-config
-$(BUILD_CONFIG): FORCE | $(OBJDIR)/
-	@printf '%s\n' '$(CC)' '$(CFLAGS)' '$(if $(filter test,$(MAKECMDGOALS)),$(CFLAGS2),$(CFLAGS))' > $@.tmp
-	@cmp -s $@.tmp $@ || mv $@.tmp $@
-	@rm -f $@.tmp
-$(ALLOBJS): $(BUILD_CONFIG)
 
 IGNORE_ALLDEPS	= clean \
 				  dist-clean \
@@ -178,8 +165,10 @@ endif
 TARGETS: $(TARGETS)
 
 .DEFAULT_GOAL := TARGETS
-.PHONY: qemu spike test
+
+.PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+#	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
 	$(V)$(QEMU) \
 		-machine virt \
 		-nographic \
@@ -191,21 +180,15 @@ debug: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-machine virt \
 		-nographic \
 		-bios default \
-		-kernel $(UCOREIMG)\
+		-kernel $(UCOREIMG) \
 		-s -S
 
 gdb:
-	riscv64-unknown-elf-gdb \
+	$(GDB) \
     -ex 'file bin/kernel' \
     -ex 'set arch riscv:rv64' \
     -ex 'target remote localhost:1234'
 
-test: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) \
-		-machine virt \
-		-nographic \
-		-bios default \
-		-kernel $(UCOREIMG)
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
 
@@ -219,18 +202,16 @@ TOUCH_FILES		:= kern/trap/trap.c
 
 MAKEOPTS		:= --quiet --no-print-directory
 
+GRADE_TMP		:= /tmp/lab4_grade
+
 grade:
-	$(V)set -eu; \
-	grade_tmp=$$(mktemp -d "$${TMPDIR:-/tmp}/ucore-lab3-grade.XXXXXX"); \
-	trap 'rm -rf "$$grade_tmp"' EXIT; \
-	tar --exclude=.git --exclude=obj --exclude=bin --exclude='.qemu.*.out' -cf "$$grade_tmp/source.tar" .; \
-	tar -C "$$grade_tmp" -xf "$$grade_tmp/source.tar"; \
-	rm "$$grade_tmp/source.tar"; \
-	python3 tools/inject.py "$$grade_tmp"; \
-	cd "$$grade_tmp"; \
-	grade_status=0; $(SH) tools/grade.sh || grade_status=$$?; \
-	for logfile in .qemu.*.out; do [ ! -f "$$logfile" ] || cp "$$logfile" '$(CURDIR)/'; done; \
-	exit $$grade_status
+	$(V)$(MAKE) $(MAKEOPTS) clean
+	$(V)$(RM) -rf $(GRADE_TMP)
+	$(V)$(MKDIR) $(GRADE_TMP)
+	$(V)tar -C . --exclude=.git --exclude=.vscode --exclude=vcs -cf - . | tar -C $(GRADE_TMP) -xf -
+	$(V)python3 tools/inject.py $(GRADE_TMP)
+	$(V)cd $(GRADE_TMP) && $(SH) tools/grade.sh
+	$(V)$(RM) -rf $(GRADE_TMP)
 
 touch:
 	$(V)$(foreach f,$(TOUCH_FILES),$(TOUCH) $(f))

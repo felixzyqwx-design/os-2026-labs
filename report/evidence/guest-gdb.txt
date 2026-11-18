@@ -1,0 +1,62 @@
+The target architecture is set to "riscv:rv64".
+0x0000000000001000 in ?? ()
+Hardware assisted breakpoint 1 at 0xffffffffc020004e: file kern/init/init.c, line 22.
+
+Breakpoint 1, kern_init () at kern/init/init.c:22
+22	    memset(edata, 0, end - edata);
+CHECKPOINT kern_init PC=0xffffffffc020004e
+Hardware assisted breakpoint 2 at 0xffffffffc020377e: file libs/list.h, line 42.
+
+Breakpoint 2, proc_init () at libs/list.h:42
+42	    elm->prev = elm->next = elm;
+kern_init () at kern/init/init.c:41
+41	    clock_init();  // init clock interrupt
+CHECKPOINT PCB idle=0 init=1 current=0
+$1 = {ra = 0xffffffffc020341a, sp = 0xffffffffc0452ee0, s0 = 0x0, s1 = 0x0, s2 = 0x0, s3 = 0x0, s4 = 0x0, s5 = 0x0, s6 = 0x0, s7 = 0x0, s8 = 0x0, s9 = 0x0, s10 = 0x0, s11 = 0x0}
+$2 = {gpr = {zero = 0x0, ra = 0x0, sp = 0xffffffffc0452ee0, gp = 0x0, tp = 0x0, t0 = 0x0, t1 = 0x0, t2 = 0x0, s0 = 0xffffffffc0203428, s1 = 0xffffffffc0205700, a0 = 0x0, a1 = 0x0, a2 = 0x0, a3 = 0x0, a4 = 0x0, a5 = 0x0, a6 = 0x0, a7 = 0x0, s2 = 0x0, s3 = 0x0, s4 = 0x0, s5 = 0x0, s6 = 0x0, s7 = 0x0, s8 = 0x0, s9 = 0x0, s10 = 0x0, s11 = 0x0, t3 = 0x0, t4 = 0x0, t5 = 0x0, t6 = 0x0}, status = 0x8000000200046120, epc = 0xffffffffc02033cc, badvaddr = 0x0, cause = 0x0}
+$3 = 0x20103c01
+Hardware assisted breakpoint 3 at 0xffffffffc0203a18: file kern/sync/sync.h, line 9.
+
+Breakpoint 3, schedule () at kern/sync/sync.h:9
+9	    if (read_csr(sstatus) & SSTATUS_SIE) {
+CHECKPOINT schedule current=0 need=1
+Hardware assisted breakpoint 4 at 0xffffffffc0203914: file kern/process/proc.c, line 352.
+
+Breakpoint 4, proc_run (proc=0xffffffffc044f110) at kern/process/proc.c:352
+352	    if (proc != current)
+CHECKPOINT proc_run target=1
+Hardware assisted breakpoint 5 at 0xffffffffc020397c: file kern/process/switch.S, line 6.
+
+Breakpoint 5, switch_to () at kern/process/switch.S:6
+6	    sd ra, 0(a0)
+CHECKPOINT switch_to from=0xffffffffc044f040 to=0xffffffffc044f140
+$4 = {ra = 0xffffffffc020341a, sp = 0xffffffffc0452ee0, s0 = 0x0, s1 = 0x0, s2 = 0x0, s3 = 0x0, s4 = 0x0, s5 = 0x0, s6 = 0x0, s7 = 0x0, s8 = 0x0, s9 = 0x0, s10 = 0x0, s11 = 0x0}
+20	    ld ra, 0(a1)
+$5 = {ra = 0xffffffffc0203954, sp = 0xffffffffc0207fa0, s0 = 0x1, s1 = 0xffffffffc020d4d0, s2 = 0x0, s3 = 0x80200000, s4 = 0x0, s5 = 0x87e00000, s6 = 0x8000000a00006800, s7 = 0x80040040, s8 = 0x2000, s9 = 0x800426e0, s10 = 0x0, s11 = 0x0}
+Hardware assisted breakpoint 6 at 0xffffffffc020341a: file kern/process/proc.c, line 151.
+
+Breakpoint 6, forkret () at kern/process/proc.c:151
+151	    forkrets(current->tf);
+CHECKPOINT forkret current=1 satp=0x800000000008040e sp=0xffffffffc0452ee0
+Hardware assisted breakpoint 7 at 0xffffffffc0200dd2: file kern/trap/trapentry.S, line 117.
+
+Breakpoint 7, forkrets () at kern/trap/trapentry.S:117
+117	    move sp, a0
+CHECKPOINT forkrets frame=0xffffffffc0452ee0
+Hardware assisted breakpoint 8 at 0xffffffffc0200d84: file kern/trap/trapentry.S, line 110.
+
+Breakpoint 8, __trapret () at kern/trap/trapentry.S:110
+110	    RESTORE_ALL
+CHECKPOINT trapret frame=0xffffffffc0452ee0
+Hardware assisted breakpoint 9 at 0xffffffffc02033cc: file kern/process/entry.S, line 4.
+
+Breakpoint 9, kernel_thread_entry () at kern/process/entry.S:4
+4		move a0, s1
+CHECKPOINT entry pc=0xffffffffc02033cc sp=0xffffffffc0452ee0 s0=0xffffffffc0203428 s1=0xffffffffc0205700 status=0x8000000200046022
+Hardware assisted breakpoint 10 at 0xffffffffc0203428: file kern/process/proc.c, line 215.
+
+Breakpoint 10, init_main (arg=0xffffffffc0205700) at kern/process/proc.c:215
+215	    cprintf("this initproc, pid = %d, name = \"%s\"\n", current->pid, get_proc_name(current));
+CHECKPOINT init_main current=1
+0xffffffffc0205700:	"Hello world!!"
+[Inferior 1 (process 1) detached]

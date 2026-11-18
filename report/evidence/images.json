@@ -1,0 +1,71 @@
+[
+  {
+    "file": "01-grade.png",
+    "width": 920,
+    "height": 353,
+    "sha256": "16d2cc62a8ca5b00eccb51c4226a5e18365de2f325ed3bddb364f74901ce2269",
+    "evidence": "grade.txt",
+    "source_sha256": "5e2e968de31a410595e42e62b5a4d1681af3a4e3b23d4f23979cf3cd839049bc",
+    "selected_lines": [
+      "  -check PMM:                                OK",
+      "  -check Process Create:                     OK",
+      "  -check Schedule:                           OK",
+      "Total Score: 30/30"
+    ]
+  },
+  {
+    "file": "02-extra.png",
+    "width": 920,
+    "height": 704,
+    "sha256": "c0c5b4c9e7a026583a9722e48003b4ec46dce936c1ef61386c3f452bd9fe7c51",
+    "evidence": "extra-rv64.txt",
+    "source_sha256": "681e9ccb1faf7acd3bbcf21407a3738e0199cdb5bfa81752e023630d5ffc1216",
+    "selected_lines": [
+      "[Extra segment PTEs] PASS",
+      "[Extra OOM rollback] PASS",
+      "[Extra large-leaf rejection] PASS",
+      "[Extra aliases TLB refs] PASS",
+      "[Extra PCB fork rollback] PASS",
+      "[Extra SIE nested same-thread] PASS",
+      "[Extra 16 32 bit breakpoint illegal returns] PASS",
+      "[Extra text rodata NX unmap faults] PASS",
+      "[Extra 64 yields registers stack order] PASS",
+      "[Extra scheduler empty single skip] PASS",
+      "[Extra PID wrap collision] PASS",
+      "[Extra live timer] PASS",
+      "[Extra ALL] PASS"
+    ]
+  },
+  {
+    "file": "03-gdb.png",
+    "width": 1325,
+    "height": 626,
+    "sha256": "b925ff3a28422bba57e4511b5fbb6f2464a9e91da19291d3d5201eb4ef069976",
+    "evidence": "guest-gdb.txt",
+    "source_sha256": "82aa915560cbcbb03ea21502b32cd5d335257b06a30341ffbcc752bcec1df03a",
+    "selected_lines": [
+      "CHECKPOINT kern_init PC=0xffffffffc020004e",
+      "CHECKPOINT PCB idle=0 init=1 current=0",
+      "CHECKPOINT schedule current=0 need=1",
+      "CHECKPOINT proc_run target=1",
+      "CHECKPOINT switch_to from=0xffffffffc044f040 to=0xffffffffc044f140",
+      "CHECKPOINT forkret current=1 satp=0x800000000008040e sp=0xffffffffc0452ee0",
+      "CHECKPOINT forkrets frame=0xffffffffc0452ee0",
+      "CHECKPOINT trapret frame=0xffffffffc0452ee0",
+      "CHECKPOINT entry pc=0xffffffffc02033cc sp=0xffffffffc0452ee0 s0=0xffffffffc0203428 s1=0xffffffffc0205700 status=0x8000000200046022",
+      "CHECKPOINT init_main current=1"
+    ]
+  },
+  {
+    "file": "04-fixed-stack.png",
+    "width": 920,
+    "height": 314,
+    "sha256": "f530758c202f879697169d3709425f37311a977393ab1e368947569263c63d32",
+    "evidence": "fixed-stack.txt",
+    "source_sha256": "4ec5284a67df3efc0b01823cb736924d7fc666194563ae218ac3f84df0185b90",
+    "selected_lines": [
+      "[Fixed stack] same sp=0x000000007ffffea0, physical stacks=0x000000008045a000/0x000000008045f000",
+      "[Fixed stack 64 yields and two guard faults] PASS"
+    ]
+  }
+]

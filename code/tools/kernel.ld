@@ -16,7 +16,8 @@ SECTIONS
         *(.text .stub .text.* .gnu.linkonce.t.*)
     }
 
-    PROVIDE(etext = .); /* Define the 'etext' symbol to this value */
+    . = ALIGN(0x1000);
+    PROVIDE(etext = .); /* End of the executable mapping, page aligned. */
 
     .rodata : {
         *(.rodata .rodata.* .gnu.linkonce.r.*)
@@ -24,6 +25,7 @@ SECTIONS
 
     /* Adjust the address for the data segment to the next page */
     . = ALIGN(0x1000);
+    PROVIDE(erodata = .);
 
     /* The data segment */
     .data : {

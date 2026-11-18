@@ -1,47 +1,36 @@
-# Lab 3：中断与异常
+# Lab 4：进程管理
 
-邹瑛琦（2412744）、丁子昂（2411130）。
+邹瑛琦（2412744）、丁子昂（2411130）
 
-代码来自 2026-11-04 核对的课程 Lab 3 官方骨架（包内目录 `lab3_new`），选择性继承 Lab 2 的物理内存初始化与分配器实现。
+以2026课程官网 `lab4.zip` 中的 `lab4_new` 为骨架，完成映射维护、内核线程创建与调度。正式报告和提示词分别见 [report.md](report/report.md)、[prompt.md](report/prompt.md)。
 
-## 功能
+```text
+code/                 内核源码与验证入口
+report/report.md      实验报告
+report/prompt.md      关键实现、测试提示词提炼稿
+report/images/        日志摘录排版图
+report/evidence/      精简原始摘录与版本/结果记录
+report/scripts/       材料检查与图片重建脚本
+```
 
-- 补全 Trap 现场恢复和汇编到 C 的调用，保持官方现场布局与保存逻辑。
-- 实现时钟中断、其他中断分类、未知原因输出，以及 16/32 位断点和非法指令返回。
-- 默认使用 Best-Fit；可通过 `PMM=first_fit` 选择 First-Fit。保留 Lab 3 内存管理中的中断保护与原子位操作。
-- 默认每 100 次时钟中断输出一次，累计输出 10 次后关机。10 是本组实现选择，网页没有给出阈值数值；可用 `DEFS+=-DSHUTDOWN_AFTER=2` 更改。
+在 WSL Ubuntu 中进入 `code/`：
 
-## 构建与运行
-
-在已有 WSL Ubuntu 环境进入 `code/`：
-
-```bash
+```sh
 make
 make qemu
 make grade
 ```
 
-调试用两个终端分别执行 `make debug`、`make gdb`。本机 `riscv64-unknown-elf-gdb` 已有包装入口，实际使用 gdb-multiarch。QEMU 使用 `-kernel` 装载；官方评分脚本只同步这一装载参数，原断言、输出判据和分值保留。
+本轮官方评分30/30。`make qemu` 在init输出后会到达原骨架 `do_exit` 的占位panic；本实验未实现完整退出回收。
 
-## 补充验证
+补充验证、固定地址栈的独立变体、两终端GDB入口见 [验证说明](code/tools/tests/README.md)。测试注入临时副本，输出目录必须尚不存在。官方评分默认使用 `/tmp/lab4_grade`，运行前确认该目录未被其他任务占用。
 
-以下脚本在临时副本注入测试，输出目录由调用者指定：
+从实验根目录检查报告链接、图片、证据与源码版本：
 
-```bash
-python3 tools/tests/run_lab3.py --mode full --out /tmp/lab3-full
-python3 tools/tests/run_lab3.py --mode boot --out /tmp/lab3-boot
-python3 tools/tests/debug_lab3.py --mode exceptions --out /tmp/lab3-gdb-exceptions
-python3 tools/tests/debug_lab3.py --mode timer --out /tmp/lab3-gdb-timer
-python3 tools/tests/run_host_regression.py --out /tmp/lab3-first-fit
-python3 tools/tests/check_build_switch.py --out /tmp/lab3-build-switch
+```sh
+python3 report/scripts/verify_materials.py
 ```
 
-本轮结果：官方评分 100/100；Best-Fit/First-Fit 内核探针、默认 10 次输出关机、64/256 MiB 内存边界、配置切换，以及 4 次异常和 2 次时钟的 GDB 现场验证均通过。主机回归仅验证 First-Fit 链表行为，不能代替 RV64 内核验证。
+该检查按源码散列核对测试版本。重新构建的 ELF 会包含本机编译目录，通常与历史调试文件散列不同；如需核对记录中的原始 ELF，可加 `--check-recorded-elf`。
 
-## 报告与证据
-
-[实验报告](report/report.md)包含两个模块的 spec、实现说明、两处正文思考、测试调试、实际问题和 OS 原理联系。[关键提示词](report/prompt.md)按实现与测试分别记录，并标明提炼稿来源。三张配图及其原始证据见 [report/evidence](report/evidence/README.md)。
-
-从 `code/` 可执行 `sh ../report/scripts/verify.sh /tmp/lab3-reproduction` 复现十类检查。图片生成脚本使用 Pillow，需要可显示中文的字体。本年度旧 Challenge 已取消，范围说明保留在报告中。
-
-本实验使用独立的 `lab3` 分支，代码和报告一同提交。
+来源：[2026指导书](http://oslab.mobisys.top/lab2026/_book/lab4/lab4.html)、[官方包](http://oslab.mobisys.top/lab2026/lab4.zip)，获取于2026-11-17。官方包SHA-256及本轮源码散列见 [results.json](report/evidence/results.json)。网页与官方压缩包不包含在实验提交目录中。

@@ -1,0 +1,34 @@
+DTB Init
+HartID: 0
+DTB Address: 0x87e00000
+Physical Memory from DTB:
+  Base: 0x0000000080000000
+  Size: 0x0000000008000000 (128 MB)
+  End:  0x0000000087ffffff
+DTB init completed
+(THU.CST) os is loading ...
+
+Special kernel symbols:
+  entry  0xc020004e (virtual)
+  etext  0xc0206000 (virtual)
+  edata  0xc020c034 (virtual)
+  end    0xc02140c0 (virtual)
+Kernel executable memory footprint: 81KB
+memory management: best_fit_pmm_manager
+physical memory map: [0x0000000080000000, 0x0000000088000000), free: [0x0000000080415000, 0x0000000088000000)
+check_alloc_page() succeeded!
+check_pgdir() succeeded!
+check_boot_pgdir() succeeded!
+use SLOB allocator
+kmalloc_init() succeeded!
+[Extra segment PTEs] PASS
+[Extra OOM rollback] PASS
+[Extra large-leaf rejection] PASS
+[Extra aliases TLB refs] PASS
+check_vma_struct() succeeded!
+check_vmm() succeeded.
+[Extra PCB fork rollback] PASS
+++ setup timer interrupts
+[Fixed stack] same sp=0x000000007ffffea0, physical stacks=0x000000008045a000/0x000000008045f000
+[Fixed stack 64 yields and two guard faults] PASS
+[Extra ALL] PASS

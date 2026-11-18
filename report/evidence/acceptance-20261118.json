@@ -1,0 +1,93 @@
+{
+  "verified_at": "2026-11-18T21:10:37.811655+08:00",
+  "source_code_tree": "0f7a9cda72d6bd1a27dae2fe06e0c6322ed828d6",
+  "source_files": 75,
+  "source_hashes_match_results_json": true,
+  "tested_from_git_archive": true,
+  "official_grade": {
+    "score": 30,
+    "total": 30,
+    "exit": 0
+  },
+  "supplemental_memory": [
+    {
+      "memory": "64M",
+      "passed": true
+    },
+    {
+      "memory": "128M",
+      "passed": true
+    },
+    {
+      "memory": "256M",
+      "passed": true
+    }
+  ],
+  "fixed_stack": {
+    "passed": true,
+    "yields": 64,
+    "guard_faults": 2
+  },
+  "synthetic_boundaries": [
+    {
+      "case": "invalid-base",
+      "passed": true
+    },
+    {
+      "case": "zero",
+      "passed": true
+    },
+    {
+      "case": "overflow",
+      "passed": true
+    },
+    {
+      "case": "no-kernel",
+      "passed": true
+    },
+    {
+      "case": "descriptors",
+      "passed": true
+    },
+    {
+      "case": "no-free",
+      "passed": true
+    },
+    {
+      "case": "fragment",
+      "passed": true
+    }
+  ],
+  "guest_gdb": {
+    "passed": true,
+    "checkpoints": [
+      "kern_init",
+      "PCB idle=0 init=1 current=0",
+      "schedule",
+      "proc_run target=1",
+      "switch_to",
+      "forkret current=1",
+      "forkrets",
+      "trapret",
+      "entry",
+      "init_main current=1"
+    ],
+    "rebuilt_elf_sha256": "7f74ff8b450adf27626da620885679d856d035f9db7f39c7b51586dad15bed1c"
+  },
+  "rebuilt_image_sha256": "ffd7f53fe7b3c746f888da2935f8c14fa4b9e8ed3f42cee5d5703c7cb12f9ef2",
+  "rebuilt_image_identical_to_original": true,
+  "latest_official_sources": {
+    "checked": 20,
+    "all_unchanged": true
+  },
+  "material_checker": {
+    "portable_rebuild_passed": true,
+    "strict_elf_mismatch_rejected": true,
+    "source_change_rejected": true
+  },
+  "limits": [
+    "do_exit remains the original panic placeholder",
+    "single-hart RV64 kernel threads",
+    "guard-page access tested; general stack-overflow recovery is not implemented"
+  ]
+}

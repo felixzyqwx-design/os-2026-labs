@@ -1,17 +1,8 @@
-# uCore build outputs
-**/obj/
-**/bin/
-
-# QEMU/GDB temporary files
-**/.qemu.out
-**/.gdb.in
-
-# Packaged hand-in archives
-**/*-handin.tar.gz
-
-# Editor and operating-system metadata
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-desktop.ini
+code/obj/
+code/bin/
+code/.gdb.in
+code/.qemu.out
+code/.*.log
+code/__pycache__/
+code/tools/tests/__pycache__/
+report/scripts/__pycache__/
